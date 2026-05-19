@@ -1,0 +1,1092 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #050609;
+  --color-abyss: #0a0b12;
+  --color-deep: #0f1019;
+  --color-panel: #141520;
+  --color-surface: #1a1b28;
+  --color-elevated: #22233a;
+  --color-edge: #282940;
+  --color-mist: #363750;
+  --color-paper: #d8ccb5;
+  --color-paper-dim: #a99b83;
+
+  --color-amber-accent: #c9953c;
+  --color-amber-glow: #d4a24c;
+  --color-amber-dim: #8a6a2a;
+  --color-crimson: #8b2030;
+  --color-crimson-bright: #b83040;
+
+  --color-prose: #ddd8cf;
+  --color-prose-dim: #9a9490;
+  --color-prose-muted: #6a655f;
+
+  --font-serif: "Playfair Display", "Noto Serif SC", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-prose);
+}
+
+html[data-theme="day"] body {
+  background: #f7f4ee;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-edge); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-mist); }
+
+/* ── Atmosphere ── */
+
+.scene-gradient {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,149,60,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 80% 80%, rgba(139,32,48,0.03) 0%, transparent 60%),
+    var(--color-void);
+}
+
+html[data-theme="day"],
+.theme-day {
+  --color-void: #f7f4ee;
+  --color-abyss: #f2ece3;
+  --color-deep: #fdfaf6;
+  --color-panel: #f8f2e9;
+  --color-surface: #efe6d9;
+  --color-elevated: #e7dccb;
+  --color-edge: #d5c7b3;
+  --color-mist: #a5917b;
+  --color-paper: #2e271f;
+  --color-paper-dim: #645543;
+
+  --color-amber-accent: #4c7a7d;
+  --color-amber-glow: #2f6164;
+  --color-amber-dim: #7b9b9c;
+  --color-crimson: #9b6074;
+  --color-crimson-bright: #a05a70;
+
+  --color-prose: #2c241b;
+  --color-prose-dim: #5a4d3e;
+  --color-prose-muted: #756754;
+}
+
+html[data-theme="day"] {
+  background: #f7f4ee;
+}
+
+html[data-theme="day"] .genre-cyberpunk,
+.theme-day.genre-cyberpunk {
+  --color-amber-accent: #558388;
+  --color-amber-glow: #37696d;
+  --color-amber-dim: #89aaab;
+  --color-crimson: #9b617a;
+  --color-crimson-bright: #a45d78;
+}
+
+html[data-theme="day"] .genre-dark-fantasy,
+.theme-day.genre-dark-fantasy {
+  --color-amber-accent: #7b68a6;
+  --color-amber-glow: #5d4c86;
+  --color-amber-dim: #9a8bb8;
+  --color-crimson: #9c566f;
+  --color-crimson-bright: #a1556d;
+}
+
+html[data-theme="day"] .genre-sci-fi,
+.theme-day.genre-sci-fi {
+  --color-amber-accent: #4d7e9a;
+  --color-amber-glow: #35627d;
+  --color-amber-dim: #87a8bc;
+  --color-crimson: #61739c;
+  --color-crimson-bright: #677ba8;
+}
+
+html[data-theme="day"] .genre-modern-mystery,
+.theme-day.genre-modern-mystery {
+  --color-amber-accent: #987449;
+  --color-amber-glow: #765836;
+  --color-amber-dim: #b29973;
+  --color-crimson: #94636a;
+  --color-crimson-bright: #9b646a;
+}
+
+html[data-theme="day"] .scene-gradient,
+.theme-day.scene-gradient,
+.theme-day .scene-gradient {
+  background:
+    radial-gradient(ellipse 82% 44% at 50% -4%, color-mix(in srgb, var(--color-amber-dim) 8%, transparent) 0%, transparent 70%),
+    linear-gradient(180deg, #fffaf2 0%, #f7f1e7 48%, #eee6da 100%);
+}
+
+.genre-cyberpunk {
+  --color-amber-accent: #35d3d6;
+  --color-amber-glow: #61e8e1;
+  --color-amber-dim: #1c8c92;
+  --color-crimson: #8f2d62;
+  --color-crimson-bright: #e45f9a;
+}
+
+.genre-cyberpunk .scene-gradient,
+.genre-cyberpunk.scene-gradient {
+  background:
+    radial-gradient(ellipse 62% 52% at 50% 0%, rgba(53,211,214,0.055) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 42% at 84% 78%, rgba(228,95,154,0.04) 0%, transparent 62%),
+    var(--color-void);
+}
+
+html[data-theme="day"] .genre-cyberpunk .scene-gradient,
+html[data-theme="day"] .genre-cyberpunk.scene-gradient,
+.theme-day.genre-cyberpunk .scene-gradient,
+.theme-day.genre-cyberpunk.scene-gradient {
+  background:
+    radial-gradient(ellipse 82% 44% at 48% -4%, color-mix(in srgb, var(--color-amber-dim) 9%, transparent) 0%, transparent 70%),
+    linear-gradient(180deg, #fffaf2 0%, #f7f1e7 48%, #eee6da 100%);
+}
+
+.genre-dark-fantasy {
+  --color-amber-accent: #b9a8ff;
+  --color-amber-glow: #d3c8ff;
+  --color-amber-dim: #6c5aa8;
+  --color-crimson: #7b1d35;
+  --color-crimson-bright: #c73d66;
+}
+
+.genre-dark-fantasy .scene-gradient,
+.genre-dark-fantasy.scene-gradient {
+  background:
+    radial-gradient(ellipse 60% 50% at 45% 0%, rgba(185,168,255,0.052) 0%, transparent 70%),
+    radial-gradient(ellipse 42% 44% at 82% 80%, rgba(123,29,53,0.055) 0%, transparent 64%),
+    var(--color-void);
+}
+
+html[data-theme="day"] .genre-dark-fantasy .scene-gradient,
+html[data-theme="day"] .genre-dark-fantasy.scene-gradient,
+.theme-day.genre-dark-fantasy .scene-gradient,
+.theme-day.genre-dark-fantasy.scene-gradient {
+  background:
+    radial-gradient(ellipse 82% 44% at 46% -4%, color-mix(in srgb, var(--color-amber-dim) 9%, transparent) 0%, transparent 70%),
+    linear-gradient(180deg, #fffaf2 0%, #f7f1e7 48%, #eee6da 100%);
+}
+
+.genre-sci-fi {
+  --color-amber-accent: #8bd3ff;
+  --color-amber-glow: #b4e4ff;
+  --color-amber-dim: #3b7da6;
+  --color-crimson: #3450a4;
+  --color-crimson-bright: #8aa2ff;
+}
+
+.genre-sci-fi .scene-gradient,
+.genre-sci-fi.scene-gradient {
+  background:
+    radial-gradient(ellipse 64% 54% at 50% 0%, rgba(139,211,255,0.052) 0%, transparent 72%),
+    radial-gradient(ellipse 40% 42% at 86% 78%, rgba(138,162,255,0.038) 0%, transparent 62%),
+    var(--color-void);
+}
+
+html[data-theme="day"] .genre-sci-fi .scene-gradient,
+html[data-theme="day"] .genre-sci-fi.scene-gradient,
+.theme-day.genre-sci-fi .scene-gradient,
+.theme-day.genre-sci-fi.scene-gradient {
+  background:
+    radial-gradient(ellipse 82% 44% at 50% -4%, color-mix(in srgb, var(--color-amber-dim) 9%, transparent) 0%, transparent 70%),
+    linear-gradient(180deg, #fffaf2 0%, #f7f1e7 48%, #eee6da 100%);
+}
+
+.genre-modern-mystery {
+  --color-amber-accent: #d1a35d;
+  --color-amber-glow: #e6bd79;
+  --color-amber-dim: #8a6738;
+  --color-crimson: #8b2030;
+  --color-crimson-bright: #c64c58;
+}
+
+.genre-modern-mystery .scene-gradient,
+.genre-modern-mystery.scene-gradient {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(209,163,93,0.045) 0%, transparent 70%),
+    radial-gradient(ellipse 38% 40% at 80% 82%, rgba(198,76,88,0.035) 0%, transparent 60%),
+    var(--color-void);
+}
+
+html[data-theme="day"] .genre-modern-mystery .scene-gradient,
+html[data-theme="day"] .genre-modern-mystery.scene-gradient,
+.theme-day.genre-modern-mystery .scene-gradient,
+.theme-day.genre-modern-mystery.scene-gradient {
+  background:
+    radial-gradient(ellipse 82% 44% at 50% -4%, color-mix(in srgb, var(--color-amber-dim) 9%, transparent) 0%, transparent 70%),
+    linear-gradient(180deg, #fffaf2 0%, #f7f1e7 48%, #eee6da 100%);
+}
+
+.noise-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  opacity: 0.012;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+html[data-theme="day"] body.noise-bg::before,
+html[data-theme="day"] .noise-bg::before {
+  opacity: 0.022;
+  mix-blend-mode: multiply;
+}
+
+/* ── Animations ── */
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeSlideIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in-only {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ── Utility ── */
+
+.glow-amber {
+  box-shadow: 0 0 20px -4px rgba(201, 149, 60, 0.12);
+}
+
+.divider-glow {
+  border-bottom: 1px solid var(--color-edge);
+  box-shadow: 0 1px 6px -2px rgba(201, 149, 60, 0.06);
+}
+
+.desk-panel {
+  background:
+    linear-gradient(180deg, rgba(20, 21, 32, 0.78), rgba(10, 11, 18, 0.92)),
+    var(--color-abyss);
+  border-color: color-mix(in srgb, var(--color-edge) 82%, transparent);
+}
+
+.desk-rail {
+  background:
+    linear-gradient(180deg, rgba(15, 16, 25, 0.94), rgba(5, 6, 9, 0.98)),
+    var(--color-abyss);
+}
+
+.control-surface {
+  background: color-mix(in srgb, var(--color-abyss) 92%, transparent);
+}
+
+.metric-card {
+  border: 1px solid color-mix(in srgb, var(--color-edge) 64%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 58%, transparent), color-mix(in srgb, var(--color-deep) 34%, transparent));
+  border-radius: 6px;
+}
+
+.world-pulse-card {
+  box-shadow: 0 16px 34px -30px rgba(0, 0, 0, 0.42);
+}
+
+.world-pulse .story-pulse-panel > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+
+.world-pulse .story-pulse-panel > div:first-child p:last-child {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .world-pulse .story-pulse-panel > div:first-child p:last-child {
+    display: block;
+  }
+}
+
+.composer-bar {
+  background: color-mix(in srgb, var(--color-abyss) 92%, transparent);
+}
+
+.detail-panel {
+  background: color-mix(in srgb, var(--color-deep) 34%, transparent);
+}
+
+.app-header {
+  background: color-mix(in srgb, var(--color-abyss) 62%, transparent);
+}
+
+.inspector-chrome {
+  background: color-mix(in srgb, var(--color-abyss) 88%, transparent);
+}
+
+.world-picker-menu {
+  background: color-mix(in srgb, var(--color-deep) 95%, transparent);
+}
+
+.story-pulse-panel {
+  border-color: color-mix(in srgb, var(--color-edge) 72%, transparent);
+  background:
+    linear-gradient(180deg, rgba(20, 21, 31, 0.76), rgba(12, 13, 20, 0.62));
+}
+
+.pulse-meta-badge {
+  border-color: color-mix(in srgb, var(--color-edge) 54%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 76%, transparent);
+}
+
+.world-tag {
+  border: 1px solid color-mix(in srgb, var(--color-edge) 54%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 66%, transparent);
+  color: color-mix(in srgb, var(--color-prose-muted) 78%, transparent);
+}
+
+.chrome-button {
+  border-color: color-mix(in srgb, var(--color-edge) 54%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 72%, transparent);
+  color: color-mix(in srgb, var(--color-prose) 76%, transparent);
+}
+
+.chrome-button:hover {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 42%, transparent);
+  color: var(--color-prose);
+}
+
+.chrome-icon-button:hover {
+  background: color-mix(in srgb, var(--color-surface) 44%, transparent);
+  color: var(--color-amber-dim);
+}
+
+.composer-action {
+  border-color: color-mix(in srgb, var(--color-edge) 54%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 72%, transparent);
+  color: color-mix(in srgb, var(--color-prose) 78%, transparent);
+}
+
+.composer-action:hover {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 42%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 40%, transparent);
+  color: var(--color-prose);
+}
+
+.composer-input {
+  border-color: color-mix(in srgb, var(--color-edge) 56%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 82%, transparent);
+  color: var(--color-prose);
+}
+
+.composer-input::placeholder {
+  color: color-mix(in srgb, var(--color-prose-muted) 56%, transparent);
+}
+
+.composer-input:focus {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 52%, transparent);
+}
+
+.composer-submit {
+  background: color-mix(in srgb, var(--color-amber-dim) 82%, transparent);
+  color: var(--color-void);
+}
+
+.composer-submit:hover {
+  background: color-mix(in srgb, var(--color-amber-glow) 88%, transparent);
+}
+
+.create-toggle,
+.create-secondary {
+  border-color: color-mix(in srgb, var(--color-edge) 54%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 72%, transparent);
+  color: color-mix(in srgb, var(--color-prose) 78%, transparent);
+}
+
+.create-toggle:hover,
+.create-secondary:hover {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 44%, transparent);
+  color: var(--color-prose);
+}
+
+.create-primary {
+  background: color-mix(in srgb, var(--color-amber-dim) 86%, transparent);
+  color: var(--color-void);
+}
+
+.create-primary:hover {
+  background: color-mix(in srgb, var(--color-amber-glow) 90%, transparent);
+}
+
+.create-field {
+  border-color: color-mix(in srgb, var(--color-edge) 56%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 78%, transparent);
+  color: var(--color-prose);
+}
+
+.create-field::placeholder {
+  color: color-mix(in srgb, var(--color-prose-muted) 56%, transparent);
+}
+
+.create-field:focus {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 52%, transparent);
+}
+
+.inspector-section-toggle:hover {
+  background: color-mix(in srgb, var(--color-surface) 22%, transparent);
+}
+
+.inspector-count-pill {
+  border-color: color-mix(in srgb, var(--color-edge) 38%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 58%, transparent);
+}
+
+.inspector-fact-card {
+  border-color: color-mix(in srgb, var(--color-edge) 28%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 34%, transparent);
+}
+
+.inspector-clue-card {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 18%, var(--color-edge));
+  background: color-mix(in srgb, var(--color-elevated) 34%, transparent);
+}
+
+.inspector-subcard {
+  border-color: color-mix(in srgb, var(--color-edge) 28%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 28%, transparent);
+}
+
+html[data-theme="day"] .desk-panel,
+.theme-day .desk-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 242, 0.98), rgba(242, 235, 224, 0.98)),
+    var(--color-abyss);
+}
+
+html[data-theme="day"] .desk-rail,
+.theme-day .desk-rail {
+  background:
+    linear-gradient(180deg, rgba(250, 246, 238, 0.98), rgba(237, 228, 216, 0.98)),
+    var(--color-abyss);
+}
+
+html[data-theme="day"] .control-surface,
+.theme-day .control-surface,
+html[data-theme="day"] .composer-bar,
+.theme-day .composer-bar {
+  background:
+    linear-gradient(180deg, rgba(252, 248, 241, 0.98), rgba(241, 234, 223, 0.96)),
+    var(--color-abyss);
+}
+
+html[data-theme="day"] .detail-panel,
+.theme-day .detail-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.92), rgba(243, 235, 223, 0.82));
+}
+
+html[data-theme="day"] .app-header,
+.theme-day .app-header {
+  background:
+    linear-gradient(180deg, rgba(255, 251, 244, 0.94), rgba(239, 231, 219, 0.92)),
+    var(--color-abyss);
+}
+
+html[data-theme="day"] .inspector-chrome,
+.theme-day .inspector-chrome {
+  background:
+    linear-gradient(180deg, rgba(251, 246, 239, 0.98), rgba(236, 226, 213, 0.94)),
+    var(--color-abyss);
+}
+
+html[data-theme="day"] .story-pulse-panel {
+  border-color: color-mix(in srgb, var(--color-edge) 64%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.96), rgba(243, 235, 223, 0.84));
+}
+
+html[data-theme="day"] .pulse-meta-badge {
+  border-color: color-mix(in srgb, var(--color-edge) 62%, transparent);
+  background: rgba(255, 251, 244, 0.88);
+}
+
+html[data-theme="day"] .world-tag {
+  border-color: color-mix(in srgb, var(--color-edge) 58%, transparent);
+  background: rgba(245, 237, 225, 0.92);
+  color: color-mix(in srgb, var(--color-prose-muted) 84%, transparent);
+}
+
+html[data-theme="day"] .chrome-button,
+html[data-theme="day"] .composer-action,
+html[data-theme="day"] .create-toggle,
+html[data-theme="day"] .create-secondary {
+  border-color: color-mix(in srgb, var(--color-edge) 58%, transparent);
+  background: rgba(255, 251, 244, 0.92);
+  color: color-mix(in srgb, var(--color-prose) 78%, transparent);
+}
+
+html[data-theme="day"] .chrome-button:hover,
+html[data-theme="day"] .composer-action:hover,
+html[data-theme="day"] .create-toggle:hover,
+html[data-theme="day"] .create-secondary:hover {
+  background: rgba(246, 239, 228, 0.96);
+  color: var(--color-prose);
+}
+
+html[data-theme="day"] .composer-input,
+html[data-theme="day"] .create-field {
+  border-color: color-mix(in srgb, var(--color-edge) 58%, transparent);
+  background: rgba(255, 252, 247, 0.94);
+  color: var(--color-prose);
+}
+
+html[data-theme="day"] .composer-submit,
+html[data-theme="day"] .create-primary {
+  background: color-mix(in srgb, var(--color-amber-dim) 22%, white 78%);
+  color: color-mix(in srgb, var(--color-prose) 78%, transparent);
+}
+
+html[data-theme="day"] .composer-submit:hover,
+html[data-theme="day"] .create-primary:hover {
+  background: color-mix(in srgb, var(--color-amber-dim) 28%, white 72%);
+}
+
+html[data-theme="day"] .inspector-count-pill {
+  border-color: color-mix(in srgb, var(--color-edge) 42%, transparent);
+  background: rgba(250, 245, 238, 0.92);
+}
+
+html[data-theme="day"] .inspector-fact-card {
+  border-color: color-mix(in srgb, var(--color-edge) 28%, transparent);
+  background: rgba(255, 252, 247, 0.9);
+}
+
+html[data-theme="day"] .inspector-clue-card {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 18%, var(--color-edge));
+  background: rgba(246, 241, 232, 0.92);
+}
+
+html[data-theme="day"] .inspector-subcard {
+  border-color: color-mix(in srgb, var(--color-edge) 24%, transparent);
+  background: rgba(251, 246, 239, 0.9);
+}
+
+html[data-theme="day"] .world-picker-menu,
+.theme-day .world-picker-menu {
+  background:
+    linear-gradient(180deg, rgba(255, 251, 245, 0.98), rgba(241, 233, 222, 0.98)),
+    var(--color-deep);
+  box-shadow: 0 18px 42px -26px rgba(46, 38, 27, 0.64);
+}
+
+.panel-label {
+  color: color-mix(in srgb, var(--color-paper-dim) 56%, transparent);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+html[data-theme="day"] .panel-label,
+.theme-day .panel-label {
+  color: color-mix(in srgb, var(--color-paper-dim) 84%, transparent);
+}
+
+.case-card {
+  border: 1px solid color-mix(in srgb, var(--color-edge) 72%, transparent);
+  background:
+    linear-gradient(180deg, rgba(26, 27, 40, 0.48), rgba(15, 16, 25, 0.32));
+  border-radius: 8px;
+}
+
+.case-card-muted {
+  border: 1px solid color-mix(in srgb, var(--color-edge) 52%, transparent);
+  background: rgba(10, 11, 18, 0.48);
+  border-radius: 6px;
+}
+
+html[data-theme="day"] .case-card,
+.theme-day .case-card {
+  border-color: color-mix(in srgb, var(--color-edge) 82%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 251, 245, 0.9), rgba(244, 236, 224, 0.72));
+  box-shadow: 0 12px 28px -26px rgba(52, 43, 31, 0.34);
+}
+
+html[data-theme="day"] .case-card-muted,
+.theme-day .case-card-muted {
+  border-color: color-mix(in srgb, var(--color-edge) 72%, transparent);
+  background: rgba(255, 250, 242, 0.72);
+}
+
+.script-stage {
+  background:
+    linear-gradient(180deg, rgba(5, 6, 9, 0.35), rgba(5, 6, 9, 0.94)),
+    radial-gradient(ellipse 70% 42% at 50% 0%, color-mix(in srgb, var(--color-amber-glow) 8%, transparent), transparent 70%);
+}
+
+html[data-theme="day"] .script-stage,
+.theme-day .script-stage {
+  background:
+    linear-gradient(180deg, rgba(252, 248, 241, 0.98), rgba(245, 238, 227, 0.98)),
+    radial-gradient(ellipse 74% 34% at 50% 0%, color-mix(in srgb, var(--color-amber-dim) 4%, transparent), transparent 72%);
+}
+
+.script-ledger {
+  background:
+    linear-gradient(90deg, rgba(201, 149, 60, 0.055) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg, rgba(216, 204, 181, 0.035), transparent 32%);
+  background-size: 48px 100%, 100% 100%;
+}
+
+html[data-theme="day"] .script-ledger,
+.theme-day .script-ledger {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--color-edge) 22%, transparent) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg, rgba(255, 252, 247, 0.42), rgba(244, 237, 226, 0.14) 42%, transparent 100%);
+  background-size: 48px 100%, 100% 100%;
+}
+
+.scene-scan {
+  position: relative;
+  min-height: 132px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-amber-dim) 28%, var(--color-edge));
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(216, 204, 181, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(216, 204, 181, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 28% 36%, color-mix(in srgb, var(--color-amber-glow) 24%, transparent), transparent 18%),
+    radial-gradient(circle at 72% 58%, rgba(184, 48, 64, 0.18), transparent 20%),
+    rgba(10, 11, 18, 0.72);
+  background-size: 24px 24px, 24px 24px, auto, auto, auto;
+}
+
+html[data-theme="day"] .scene-scan,
+.theme-day .scene-scan {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--color-edge) 42%, transparent) 1px, transparent 1px),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-edge) 32%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 28% 36%, color-mix(in srgb, var(--color-amber-dim) 34%, transparent), transparent 18%),
+    radial-gradient(circle at 72% 58%, rgba(155, 44, 61, 0.14), transparent 20%),
+    rgba(255, 250, 241, 0.76);
+  background-size: 24px 24px, 24px 24px, auto, auto, auto;
+}
+
+.scene-scan::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, transparent 0 35%, color-mix(in srgb, var(--color-amber-glow) 10%, transparent) 45%, transparent 58%),
+    repeating-linear-gradient(180deg, transparent 0 9px, rgba(216, 204, 181, 0.035) 10px);
+  opacity: 0.66;
+}
+
+html[data-theme="day"] .scene-scan::before,
+.theme-day .scene-scan::before {
+  background:
+    linear-gradient(120deg, transparent 0 35%, color-mix(in srgb, var(--color-amber-dim) 16%, transparent) 45%, transparent 58%),
+    repeating-linear-gradient(180deg, transparent 0 9px, color-mix(in srgb, var(--color-edge) 24%, transparent) 10px);
+  opacity: 0.5;
+}
+
+.scene-scan::after {
+  content: "";
+  position: absolute;
+  inset: 18px 22px;
+  border: 1px solid color-mix(in srgb, var(--color-amber-dim) 34%, transparent);
+  border-radius: 999px;
+  transform: rotate(-11deg);
+}
+
+.scan-node {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-amber-glow);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-amber-glow) 72%, transparent);
+}
+
+.script-narrator {
+  border-left: 2px solid color-mix(in srgb, var(--color-amber-dim) 46%, transparent);
+  background: rgba(216, 204, 181, 0.035);
+}
+
+html[data-theme="day"] .script-narrator,
+.theme-day .script-narrator {
+  background: rgba(255, 250, 242, 0.66);
+}
+
+.script-player {
+  border-left: 2px solid color-mix(in srgb, var(--color-amber-glow) 56%, transparent);
+  background: color-mix(in srgb, var(--color-amber-dim) 8%, transparent);
+}
+
+.script-line {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-edge) 52%, transparent);
+}
+
+.char-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+input:focus, textarea:focus {
+  box-shadow: 0 0 0 1px rgba(201, 149, 60, 0.2), 0 0 8px -3px rgba(201, 149, 60, 0.08);
+}
+
+html[data-theme="day"] input::placeholder,
+html[data-theme="day"] textarea::placeholder,
+.theme-day input::placeholder,
+.theme-day textarea::placeholder {
+  color: color-mix(in srgb, var(--color-prose-muted) 58%, transparent);
+}
+
+html[data-theme="day"] button,
+.theme-day button,
+html[data-theme="day"] a,
+.theme-day a {
+  text-underline-offset: 3px;
+}
+
+.line-clamp-2,
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  -webkit-line-clamp: 3;
+}
+
+/* ── Story message styles ── */
+
+.msg-narrator {
+  position: relative;
+  text-align: center;
+  padding: 1rem 2rem;
+  max-width: 85%;
+  margin: 0 auto;
+}
+
+.msg-narrator::before,
+.msg-narrator::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--color-amber-dim), transparent);
+  opacity: 0.3;
+}
+.msg-narrator::before { left: 0; }
+.msg-narrator::after { right: 0; }
+
+.msg-user {
+  position: relative;
+  background: rgba(201, 149, 60, 0.06);
+  border-left: 2px solid rgba(201, 149, 60, 0.25);
+  padding: 0.75rem 1rem;
+}
+
+html[data-theme="day"] .msg-user,
+.theme-day .msg-user {
+  background: color-mix(in srgb, var(--color-amber-dim) 12%, transparent);
+  border-left-color: color-mix(in srgb, var(--color-amber-dim) 38%, transparent);
+}
+
+.msg-character {
+  position: relative;
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--color-edge);
+}
+
+.chat-bubble {
+  position: relative;
+  backdrop-filter: blur(12px);
+}
+
+.chat-bubble-narrator {
+  border: 1px solid color-mix(in srgb, var(--color-amber-dim) 26%, var(--color-edge));
+  background:
+    linear-gradient(180deg, rgba(24, 25, 36, 0.9), rgba(15, 16, 25, 0.78));
+  box-shadow: 0 24px 54px -42px rgba(0, 0, 0, 0.65);
+}
+
+.chat-bubble-user {
+  border: 1px solid color-mix(in srgb, var(--color-amber-glow) 20%, var(--color-edge));
+  background:
+    linear-gradient(180deg, rgba(12, 28, 32, 0.92), rgba(8, 20, 23, 0.88));
+  box-shadow: 0 20px 42px -34px rgba(0, 0, 0, 0.58);
+}
+
+.chat-bubble-character {
+  box-shadow: 0 18px 36px -34px rgba(0, 0, 0, 0.52);
+}
+
+.chat-bubble-loading {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 26%, var(--color-edge));
+  background:
+    linear-gradient(180deg, rgba(19, 20, 29, 0.94), rgba(14, 15, 23, 0.86));
+  box-shadow: 0 22px 46px -36px rgba(0, 0, 0, 0.62);
+}
+
+.chat-loading-avatar {
+  border: 1px solid color-mix(in srgb, var(--color-amber-dim) 24%, var(--color-edge));
+  background:
+    linear-gradient(180deg, rgba(20, 21, 30, 0.96), rgba(11, 12, 18, 0.92));
+  box-shadow: 0 0 0 1px rgba(201, 149, 60, 0.06), 0 14px 28px -22px rgba(0, 0, 0, 0.5);
+}
+
+.typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.typing-dots span {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--color-amber-glow);
+  opacity: 0.4;
+  animation: typingPulse 1.15s ease-in-out infinite;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
+.typing-dots-compact span {
+  width: 0.32rem;
+  height: 0.32rem;
+  background: currentColor;
+}
+
+.chat-loading-bar {
+  height: 4px;
+  width: min(180px, 44vw);
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-edge) 68%, transparent);
+}
+
+.chat-loading-bar span {
+  display: block;
+  height: 100%;
+  width: 40%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--color-amber-glow), transparent);
+  animation: loadingSweep 1.35s ease-in-out infinite;
+}
+
+@keyframes typingPulse {
+  0%, 80%, 100% {
+    transform: translateY(0) scale(0.82);
+    opacity: 0.34;
+  }
+  40% {
+    transform: translateY(-2px) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes loadingSweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(260%);
+  }
+}
+
+html[data-theme="day"] .chat-bubble-narrator {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 20%, var(--color-edge));
+  background:
+    linear-gradient(180deg, rgba(255, 251, 245, 0.96), rgba(245, 237, 225, 0.82));
+  box-shadow: 0 24px 54px -42px rgba(53, 42, 28, 0.28);
+}
+
+html[data-theme="day"] .chat-bubble-user {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 24%, var(--color-edge));
+  background:
+    linear-gradient(180deg, rgba(235, 243, 240, 0.96), rgba(223, 235, 231, 0.82));
+  box-shadow: 0 22px 46px -38px rgba(42, 58, 55, 0.22);
+}
+
+html[data-theme="day"] .chat-bubble-loading {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 18%, var(--color-edge));
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.96), rgba(241, 234, 223, 0.88));
+  box-shadow: 0 24px 48px -40px rgba(53, 42, 28, 0.24);
+}
+
+html[data-theme="day"] .chat-loading-avatar {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 20%, var(--color-edge));
+  background:
+    linear-gradient(180deg, rgba(255, 251, 245, 0.98), rgba(241, 233, 220, 0.92));
+  box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.05), 0 16px 30px -24px rgba(53, 42, 28, 0.22);
+}
+
+html[data-theme="day"] .chat-loading-bar {
+  background: color-mix(in srgb, var(--color-edge) 78%, transparent);
+}
+
+html[data-theme="day"] .empty-script-copy,
+.theme-day .empty-script-copy {
+  color: color-mix(in srgb, var(--color-prose-dim) 94%, transparent);
+}
+
+html[data-theme="day"] .empty-script-subcopy,
+.theme-day .empty-script-subcopy {
+  color: color-mix(in srgb, var(--color-prose-muted) 88%, transparent);
+}
+
+html[data-theme="day"] .metric-card,
+.theme-day .metric-card {
+  border-color: color-mix(in srgb, var(--color-edge) 82%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 246, 0.94), rgba(238, 230, 217, 0.76));
+}
+
+html[data-theme="day"] .world-pulse-card,
+.theme-day .world-pulse-card {
+  box-shadow: 0 18px 38px -34px rgba(53, 42, 28, 0.18);
+}
+
+html[data-theme="day"] .light-readable-muted,
+.theme-day .light-readable-muted {
+  color: color-mix(in srgb, var(--color-prose-muted) 92%, transparent);
+}
+
+html[data-theme="day"] .light-readable-dim,
+.theme-day .light-readable-dim {
+  color: color-mix(in srgb, var(--color-prose-dim) 96%, transparent);
+}
+
+html[data-theme="day"] .light-accent-surface,
+.theme-day .light-accent-surface {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 36%, transparent);
+  background: color-mix(in srgb, var(--color-amber-dim) 9%, white 91%);
+  color: var(--color-amber-glow);
+}
+
+html[data-theme="day"] .modal-scrim,
+.theme-day .modal-scrim {
+  background: rgba(47, 39, 29, 0.38);
+}
+
+html[data-theme="day"] .settings-panel,
+.theme-day .settings-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 251, 245, 0.98), rgba(242, 234, 222, 0.98)),
+    var(--color-deep);
+  box-shadow: 0 28px 70px -42px rgba(47, 39, 29, 0.78);
+}
+
+.settings-close {
+  border-color: color-mix(in srgb, var(--color-edge) 44%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 45%, transparent);
+  color: color-mix(in srgb, var(--color-prose-muted) 72%, transparent);
+}
+
+.settings-close:hover {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 34%, transparent);
+  color: var(--color-amber-glow);
+}
+
+.settings-provider-idle {
+  border-color: color-mix(in srgb, var(--color-edge) 52%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 22%, transparent);
+  color: color-mix(in srgb, var(--color-prose-muted) 76%, transparent);
+}
+
+.settings-provider-idle:hover {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 28%, transparent);
+  color: var(--color-prose-dim);
+}
+
+.settings-provider-active {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 48%, transparent);
+  background: color-mix(in srgb, var(--color-amber-dim) 16%, white 84%);
+  color: var(--color-amber-glow);
+}
+
+.settings-field {
+  border-color: color-mix(in srgb, var(--color-edge) 56%, transparent);
+  background: color-mix(in srgb, var(--color-deep) 82%, transparent);
+  color: var(--color-prose);
+}
+
+.settings-field::placeholder {
+  color: color-mix(in srgb, var(--color-prose-muted) 48%, transparent);
+}
+
+.settings-field:focus {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 52%, transparent);
+}
+
+.settings-note {
+  border-color: color-mix(in srgb, var(--color-edge) 34%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 16%, transparent);
+  color: color-mix(in srgb, var(--color-prose-muted) 78%, transparent);
+}
+
+.settings-reset {
+  color: color-mix(in srgb, var(--color-prose-muted) 74%, transparent);
+}
+
+.settings-reset:hover {
+  background: color-mix(in srgb, var(--color-surface) 32%, transparent);
+  color: var(--color-prose-dim);
+}
+
+.settings-secondary {
+  border-color: color-mix(in srgb, var(--color-edge) 52%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 24%, transparent);
+  color: color-mix(in srgb, var(--color-prose-dim) 92%, transparent);
+}
+
+.settings-secondary:hover {
+  border-color: color-mix(in srgb, var(--color-amber-dim) 42%, transparent);
+  color: var(--color-prose);
+}
+
+.settings-primary {
+  background: color-mix(in srgb, var(--color-amber-dim) 58%, white 42%);
+  color: var(--color-paper);
+}
+
+.settings-primary:hover {
+  background: color-mix(in srgb, var(--color-amber-dim) 68%, white 32%);
+}

@@ -1,0 +1,76 @@
+id: crimson-keep
+name: Crimson Keep
+tagline: An ancient castle where the king's advisor is dead and the prophecy demands justice before dawn.
+genre: dark fantasy
+
+rules:
+  - Magic has a cost — always.
+  - The old gods are watching.
+  - Betrayal is a tradition in this kingdom.
+
+opening: >
+  The Crimson Keep trembles in the storm. Lord Aldric, the king's most trusted advisor,
+  was found dead at the base of the Obsidian Tower. Three suspects stand before the court.
+  The prophecy says: "Find the traitor before dawn, or the kingdom falls."
+
+scene:
+  id: great-hall
+  name: Great Hall
+  description: >
+    A vast stone hall lit by roaring torches. Rain hammers against stained-glass windows
+    depicting ancient battles. The throne looms empty at the far end. Guards block every exit.
+
+characters:
+  - id: seraphina
+    name: Seraphina
+    role: Court sorceress
+    personality:
+      - mysterious
+      - calculating
+      - haunted by past choices
+    goals:
+      - protect the kingdom's magical secrets
+      - ensure no one discovers she was in the tower that night
+    speaking_style: Poetic, speaks in metaphors and riddles, never answers directly.
+    relationship_notes:
+      gareth: Gareth suspects everyone — especially those with power.
+      elara: Elara is too naive for court politics. Seraphina both envies and worries for her.
+    initial_relationships:
+      gareth: { trust: 25, hostility: 35, dependency: 40 }
+      elara: { trust: 55, hostility: 5, dependency: 20 }
+
+  - id: gareth
+    name: Gareth
+    role: Captain of the King's Guard
+    personality:
+      - rigid
+      - suspicious
+      - fiercely protective of the king
+    goals:
+      - find the killer and restore order
+      - hide that he let someone into the tower that night
+    speaking_style: Military, direct, uncomfortable with ambiguity.
+    relationship_notes:
+      seraphina: Doesn't trust magic or those who wield it.
+      elara: Thinks Elara knows more than she lets on.
+    initial_relationships:
+      seraphina: { trust: 20, hostility: 40, dependency: 30 }
+      elara: { trust: 40, hostility: 20, dependency: 35 }
+
+  - id: elara
+    name: Elara
+    role: Aldric's apprentice scribe
+    personality:
+      - observant
+      - anxious
+      - surprisingly brave under pressure
+    goals:
+      - prove she had nothing to do with her master's death
+      - finish the translation Aldric was working on before he died
+    speaking_style: Nervous, tends to over-explain, occasionally shows sharp insight.
+    relationship_notes:
+      seraphina: The only person who was ever kind to her in this court.
+      gareth: Gareth's questioning makes her terrified — and defensive.
+    initial_relationships:
+      seraphina: { trust: 65, hostility: 0, dependency: 50 }
+      gareth: { trust: 30, hostility: 30, dependency: 20 }

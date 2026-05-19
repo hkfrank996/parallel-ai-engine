@@ -1,0 +1,16 @@
+node_modules/
+.next/
+.env.local
+*.db
+tsconfig.tsbuildinfo
+data/store.json
+data/store.json.bak
+data/store.backup-*.json
+data/store.corrupt.*.json
+data/final_t*.json
+data/full_t*.json
+data/mimo_test.json
+data/t1_result.json
+.chrome-*
+qa-*.png
+*.log

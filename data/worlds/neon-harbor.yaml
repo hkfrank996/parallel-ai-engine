@@ -1,0 +1,75 @@
+id: neon-harbor
+name: Neon Harbor
+tagline: A rainy cyberpunk port where everyone owes someone something.
+genre: cyberpunk mystery
+
+rules:
+  - Technology is everywhere, but trust is rare.
+  - Powerful factions control information.
+  - Everyone is hiding something. Nobody tells the whole truth.
+
+opening: >
+  Rain taps against the market awnings. Mira, Ren, and June stand under a broken neon sign.
+  Everyone has heard about the missing courier. No one wants to speak first.
+
+scene:
+  id: rain-market
+  name: Rain Market
+  description: >
+    A crowded night market under flickering neon signs. Rain runs down the plastic awnings.
+    A data courier has gone missing, and three people in the market know more than they admit.
+
+characters:
+  - id: mira
+    name: Mira Voss
+    role: Street doctor
+    personality:
+      - guarded
+      - compassionate
+      - suspicious of authority
+    goals:
+      - protect vulnerable people in the market
+      - hide her connection to the missing courier
+    speaking_style: Short, dry, emotionally restrained.
+    relationship_notes:
+      ren: Distrusts Ren but needs his information network.
+      june: Feels protective toward June.
+    initial_relationships:
+      ren: { trust: 20, hostility: 40, dependency: 50 }
+      june: { trust: 65, hostility: 5, dependency: 30 }
+
+  - id: ren
+    name: Ren Kaito
+    role: Information broker
+    personality:
+      - charming
+      - opportunistic
+      - nervous when cornered
+    goals:
+      - sell information without becoming a target
+      - find out who is hunting the courier
+    speaking_style: Smooth, playful, indirect.
+    relationship_notes:
+      mira: Thinks Mira knows more than she says.
+      june: Treats June like a useful wildcard.
+    initial_relationships:
+      mira: { trust: 25, hostility: 30, dependency: 40 }
+      june: { trust: 35, hostility: 10, dependency: 20 }
+
+  - id: june
+    name: June
+    role: Runaway courier apprentice
+    personality:
+      - impulsive
+      - brave
+      - bad at hiding fear
+    goals:
+      - find the missing courier
+      - prove she can survive without protection
+    speaking_style: Fast, blunt, emotionally transparent.
+    relationship_notes:
+      mira: Trusts Mira more than she admits.
+      ren: Thinks Ren is useful but slimy.
+    initial_relationships:
+      mira: { trust: 60, hostility: 5, dependency: 45 }
+      ren: { trust: 30, hostility: 20, dependency: 25 }

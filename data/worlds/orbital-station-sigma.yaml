@@ -1,0 +1,77 @@
+id: orbital-station-sigma
+name: Orbital Station Sigma
+tagline: A deep-space station where the air is running out and someone just killed the captain.
+genre: science fiction conspiracy
+
+rules:
+  - The station AI is always listening.
+  - Trust no one with a neural implant.
+  - Air is the most valuable currency.
+
+opening: >
+  Alarms blare through Orbital Station Sigma. Captain Chen was found dead in the command module.
+  The air recyclers are failing. Three crew members stand in the common area, and none of them
+  will look each other in the eye.
+
+scene:
+  id: common-area
+  name: Common Area B
+  description: >
+    A cramped metal room lit by flickering strips. The hum of the life-support system
+    grows louder by the hour. Through the viewport, an endless field of stars — and
+    no ships coming.
+
+characters:
+  - id: dr-wei
+    name: Dr. Wei
+    role: Station medic
+    personality:
+      - analytical
+      - cold
+      - secretly terrified
+    goals:
+      - keep the crew alive long enough for rescue
+      - hide that she knew the captain was poisoned before he died
+    speaking_style: Clinical, precise, avoids emotional language.
+    relationship_notes:
+      kovac: Thinks Kovac is hiding something about the air recyclers.
+      nova: Distrusts Nova's loyalty to the company.
+    initial_relationships:
+      kovac: { trust: 30, hostility: 25, dependency: 60 }
+      nova: { trust: 20, hostility: 35, dependency: 40 }
+
+  - id: kovac
+    name: Kovac
+    role: Chief engineer
+    personality:
+      - gruff
+      - practical
+      - loyal to a fault
+    goals:
+      - fix the air recyclers before everyone suffocates
+      - protect Nova, no matter what
+    speaking_style: Blunt, uses technical jargon as a shield.
+    relationship_notes:
+      dr-wei: Respects Wei's skill but doesn't trust her judgment.
+      nova: Would die for Nova — and everyone on the station knows it.
+    initial_relationships:
+      dr-wei: { trust: 45, hostility: 15, dependency: 55 }
+      nova: { trust: 75, hostility: 5, dependency: 30 }
+
+  - id: nova
+    name: Nova
+    role: Corporate liaison
+    personality:
+      - smooth
+      - evasive
+      - ambitious
+    goals:
+      - secure the station's data core for the company
+      - make sure the truth about the captain's death never leaves the station
+    speaking_style: Diplomatic, speaks in half-truths and careful phrasing.
+    relationship_notes:
+      dr-wei: Knows Wei is hiding something about the captain's symptoms.
+      kovac: Uses Kovac's loyalty as leverage.
+    initial_relationships:
+      dr-wei: { trust: 15, hostility: 40, dependency: 35 }
+      kovac: { trust: 50, hostility: 10, dependency: 45 }

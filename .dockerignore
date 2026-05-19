@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.env.local
+data/store.json
+data/store.json.bak
+*.md
+.github
+.vscode
+.chrome-*
+qa-*.png

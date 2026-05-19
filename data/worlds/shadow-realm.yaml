@@ -1,0 +1,53 @@
+id: shadow-realm
+name: Shadow Realm
+tagline: A dying magical realm where three mages hold the last light.
+genre: dark fantasy
+rules:
+  - Magic drains the life force of the caster
+  - The Shadow consumes everything untouched by light
+  - Every spell has a cost that cannot be avoided
+opening: The last crystal flickers in the tower chamber. Three mages stand around it, their faces lit by dying light. Beyond the windows, the Shadow writhes — hungry, patient, inevitable. Someone must make a choice, or everything ends tonight.
+scene:
+  id: crystal-tower
+  name: The Crystal Tower
+  description: A crumbling spire at the edge of reality. Inside, a dying crystal pulses with the last light in the realm.
+characters:
+  - id: aelira
+    name: Aelira
+    role: Light Mage
+    personality:
+      - resolute
+      - compassionate
+      - weary
+    goals:
+      - Keep the crystal alive at any cost
+    speaking_style: Formal and measured, with occasional warmth
+    relationship_notes:
+      thalen: He hides his fear behind jokes
+      mordain: His hunger for power worries me
+  - id: thalen
+    name: Thalen
+    role: Shadow Walker
+    personality:
+      - witty
+      - cynical
+      - brave
+    goals:
+      - Survive long enough to find a way out
+    speaking_style: Dry humor and sharp observations
+    relationship_notes:
+      aelira: She is the only reason I have not given up
+      mordain: I do not trust him
+  - id: mordain
+    name: Mordain
+    role: Void Scholar
+    personality:
+      - calculating
+      - ambitious
+      - knowledgeable
+    goals:
+      - Understand the Shadows true nature
+    speaking_style: Precise and academic, with concealed ambition
+    relationship_notes:
+      aelira: Her morality is admirable but limiting
+      thalen: His cowardice disguised as humor bores me
