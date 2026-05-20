@@ -49,7 +49,7 @@ On Windows PowerShell:
 docker run --rm -p 3000:3000 --env-file .env.local -v "${PWD}/data:/app/data" parallel
 ```
 
-The container runs in Mock Mode if no API key is provided.
+The container runs in Mock Mode if no provider is configured. If you configure an OpenAI-compatible provider with an empty key, it sends requests without an Authorization header (not Mock Mode).
 
 ### Windows (no terminal)
 
@@ -59,7 +59,7 @@ Double-click `start.bat` or `启动Parallel.bat`, then open `http://localhost:30
 
 ## Model Configuration
 
-Parallel works without an API key by using Mock Mode.
+Parallel runs in Mock Mode only when no provider is configured at all. OpenAI-compatible providers (openai, ollama) work without an API key — they simply omit the Authorization header. Anthropic and OpenRouter require an API key.
 
 Copy `.env.local.example` to `.env.local` and configure one provider:
 
