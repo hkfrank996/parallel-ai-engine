@@ -1,4 +1,4 @@
-# Parallel — AI 世界引擎
+# Parallel — AI叙事世界引擎
 
 > **一句话定义：** 你走进一个 AI 构建的世界，里面每个人都有自己的意志。你探索、对话、发现——而这个世界会根据你的一举一动，实时改变走向。
 >
@@ -6,7 +6,7 @@
 >
 > **支持任何类型的世界**：赛博朋克悬疑、暗黑奇幻、科幻阴谋、现代都市……你创建什么，Parallel 就运行什么。
 
-## 核心概念：活的 AI 世界引擎
+## 核心概念：活的 AI 叙事世界引擎
 
 传统互动叙事 = 固定剧本 + 固定角色 + 固定真相。玩家只是"读剧本"。
 
@@ -368,7 +368,7 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 - Roadmap / Issues / Contributing / Changelog
 
 ### 验收标准
-- 面试官 2 分钟内理解：这不是聊天机器人，这是一个活的剧本杀世界
+- 面试官 2 分钟内理解：这不是聊天机器人，这是一个活的 AI 叙事世界
 - 开发者 10 分钟内跑起来
 - 玩家 5 分钟内感受到"这个世界会记住我，而且因为我的存在而不同"
 
@@ -436,7 +436,7 @@ Parallel 的第一性原理：
 - README 更新
 
 ### 可写文章标题
-- Building a Living Murder Mystery Engine
+- Building a Living Narrative World Engine
 - How Parallel's AI Showrunner Rewrites the Story in Real-Time
 - Not a Chatbot, Not a Game — A Living World
 - Dynamic Narrative: When the AI Director Changes the Plot Because of You

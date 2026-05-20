@@ -3,8 +3,8 @@ import "./globals.css";
 import ThemeRouteSync from "./ThemeRouteSync";
 
 export const metadata: Metadata = {
-  title: "Parallel — AI World Engine",
-  description: "Immersive AI-driven interactive story and living world engine",
+  title: "Parallel — AI叙事世界引擎",
+  description: "A living narrative world engine with AI showrunner, dynamic characters, memory, and evolving world state",
 };
 
 export default function RootLayout({

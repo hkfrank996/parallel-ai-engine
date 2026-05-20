@@ -1,10 +1,10 @@
 @echo off
 chcp 65001 >nul 2>&1
-title Parallel - AI World Engine
+title Parallel — AI叙事世界引擎
 
 echo.
 echo  ╔═══════════════════════════════════════╗
-echo  ║   Parallel — Living Mystery v0.4.0    ║
+echo  ║   Parallel — AI叙事世界引擎 v0.6.0    ║
 echo  ╚═══════════════════════════════════════╝
 echo.
 

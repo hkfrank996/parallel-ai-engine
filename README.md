@@ -1,6 +1,10 @@
-# Parallel
+# Parallel — AI叙事世界引擎
 
-> A living murder-mystery world engine: AI showrunner, dynamic characters, mutable truth.
+> Parallel 是一个会记忆、会演化、会推动剧情的 AI 叙事世界引擎。
+
+> Parallel is a living narrative world engine with AI showrunner, memory, dynamic characters, and evolving world state.
+
+> A living narrative world engine with AI showrunner, dynamic characters, memory, and evolving world state.
 
 Parallel puts the player inside a scene where characters remember, relationships shift, time passes, and the world reacts to player behavior. It is not a single-character chatbot. It is a small living world.
 

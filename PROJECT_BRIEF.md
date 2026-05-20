@@ -1,4 +1,4 @@
-# Parallel — AI 世界引擎
+# Parallel — AI叙事世界引擎
 
 > 构建一个你可以住进去的平行世界。
 
@@ -82,7 +82,7 @@
 
 ## 简历包装
 
-对外叫 **"AI World Simulation Engine"** 或 **"Multi-Agent World Engine"**
+对外叫 **"AI叙事世界引擎"**（英文：A living narrative world engine）
 - 强调：多 agent 协作架构、持久世界状态管理、长期记忆系统
 - 不提：虚拟情人、无限制、NSFW
 
