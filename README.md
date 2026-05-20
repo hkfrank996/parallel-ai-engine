@@ -4,6 +4,8 @@
 >
 > *一个会记忆、会演化、会推动剧情的 AI 剧本杀世界。*
 
+[中文文档 / Chinese Docs](README_ZH.md)
+
 Parallel puts the player inside a scene where characters remember, relationships shift, time passes, and the world reacts to player behavior. It is not a single-character chatbot. It is a small living world — an AI showrunner directs the drama, characters have agency, and the truth itself can change.
 
 ## Current Version
@@ -163,7 +165,8 @@ docs/         ARCHITECTURE.md, API.md
 
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Directory structure, request flow, provider system, extension layer
 - **[docs/API.md](docs/API.md)** — API endpoint reference
-- **[PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md)** — Product vision and version history
+- **[PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md)** — Product vision and version history (Chinese)
+- **[docs/PRODUCT_ROADMAP_EN.md](docs/PRODUCT_ROADMAP_EN.md)** — Product roadmap (English)
 
 ---
 
