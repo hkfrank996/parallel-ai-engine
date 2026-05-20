@@ -1,5 +1,8 @@
 # Parallel
 
+[![CI](https://github.com/hkfrank996/parallel-ai-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/hkfrank996/parallel-ai-engine/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > A living narrative world engine for AI-driven murder mysteries, investigative roleplay, and evolving multi-character scenes.
 >
 > *一个会记忆、会演化、会推动剧情的 AI 剧本杀世界。*
@@ -70,7 +73,7 @@ The container runs in Mock Mode if no provider is configured.
 
 ### Windows (no terminal)
 
-Double-click `start.bat` or `启动Parallel.bat`, then open `http://localhost:3000`.
+Double-click `start.bat`, then open `http://localhost:3000`.
 
 ## Model Configuration
 

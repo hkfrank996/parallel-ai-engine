@@ -55,7 +55,7 @@ docker run --rm -p 3000:3000 --env-file .env.local -v "${PWD}/data:/app/data" pa
 
 ### Windows（无终端）
 
-双击 `start.bat` 或 `启动Parallel.bat`，然后打开 `http://localhost:3000`。
+双击 `start.bat`，然后打开 `http://localhost:3000`。
 
 ---
 
