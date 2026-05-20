@@ -26,14 +26,6 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 3. **角色有自己的意志** — 总导演让角色按照自己的利益行动，而不是按照"剧本需要"
 4. **世界自己运转** — 即使用户什么都不做，世界也在发生变化
 
-## 产品愿景
-
-```
-玩家不是在"玩一个游戏"，
-而是在"进入一个世界"——
-这个世界会记住他、回应他、甚至因为他的存在而变得不同。
-```
-
 ## 发展原则
 
 1. **活的 > 固定的**：每个功能的第一问是"这能让世界更活吗？"
@@ -56,7 +48,7 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 | v0.4 | 剧本工坊 | 创建自己的世界 | 不写代码也能造一个世界 | ✅ |
 | v0.5 | 产品优化 | 玩家身份+线索+调查+通用引擎 | 从"聊天"变成"调查"，引擎适配任何类型 | ✅ |
 | v0.6 | 可扩展 | Docker、CI、多模型、扩展层 | 陌生开发者 10 分钟跑起来 | ✅ |
-| v1.0 | 作品级 | 完整作品发布 | 面试官 2 分钟理解项目价值 | ⬜ |
+| v1.0 | Release | Polished public release with demo worlds | Complete docs, online demo, contributor guide | ⬜ |
 
 ---
 
@@ -206,10 +198,8 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 | P1 | `mimo-v2.5-pro` 路径每轮 70-90 秒（历史测试） | ⚠️ 已知 | 后处理已并行，推理瓶颈主要来自较慢模型 |
 | P2 | store.json 全量写入性能 | ❌ v0.4 | 50+ 轮后考虑 SQLite |
 
-### 简历价值
-**这是项目的核心差异化。** Character.AI 是聊天，SillyTavern 是角色扮演，Parallel 是**活的世界模拟**。
-
-详细开发文档见 `V0.3_DEVELOPMENT_SPEC.md`。
+### Core Differentiation
+Character.AI is chat. SillyTavern is roleplay. Parallel is a **living world simulation** — the AI showrunner adapts the entire story based on player behavior.
 
 ---
 
@@ -356,25 +346,21 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 
 ---
 
-## v1.0 — 作品级发布 ⬜
+## v1.0 — Public Release ⬜
 
-**目标：** 面试官打开 GitHub，2 分钟内理解这个项目有多牛逼。
+**Goal:** A polished, well-documented open-source release that anyone can understand in 2 minutes.
 
-### 功能范围
-- 3-5 个完整 demo worlds
-- 在线 demo 或高清录屏
-- 完整文档站 + 架构图 + 数据流图
-- "How it works" 技术文章
+### Scope
+- 3-5 complete demo worlds
+- Online demo or HD recording
+- Full docs site + architecture diagrams + data flow diagrams
+- "How it works" technical article
 - Roadmap / Issues / Contributing / Changelog
 
-### 验收标准
-- 面试官 2 分钟内理解：这不是聊天机器人，这是一个活的 AI 叙事世界
-- 开发者 10 分钟内跑起来
-- 玩家 5 分钟内感受到"这个世界会记住我，而且因为我的存在而不同"
-
-### 简历价值
-
-> Built an AI-driven interactive story engine with persistent world state, dynamic narrative rewriting, character-specific memory, and a real-time AI Showrunner that adapts the entire storyline based on player behavior.
+### Acceptance Criteria
+- A visitor understands in 2 minutes: this is not a chatbot, it is a living narrative world
+- A developer runs it locally in 10 minutes
+- A player feels "this world remembers me" within 5 minutes
 
 ---
 
@@ -410,32 +396,10 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 ### 挑战 4：不可预测性
 活的世界意味着总导演会做出开发者没想到的事。这是特性不是 bug —— 但需要安全边界。**解决方案：** 世界规则（YAML 中的 rules）作为总导演的约束。超出规则的行为被拒绝。
 
-## 最终判断
-
-Parallel 的第一性原理：
-
-> **这是一个活的世界。玩家走进去，世界因为他而变得不同。**
->
-> 传统互动叙事：剧本写好了，玩家只是执行者。
-> Parallel：AI 总导演根据玩家的每一步，实时改写这个世界的剧情、关系、甚至真相。
->
-> 没有两次游戏是一样的。因为没有一个玩家是一样的。因为没有一个世界是一样的。
-
 ---
 
-## GitHub 更新节奏
+## Blog Post Ideas
 
-### 每周
-- 周一：开 milestone，写本周目标
-- 周三：发 progress note、截图或 demo gif
-- 周五：合并可见改进，打小版本
-
-### 每两周
-- 一篇技术笔记或产品复盘
-- 一个可展示 demo
-- README 更新
-
-### 可写文章标题
 - Building a Living Narrative World Engine
 - How Parallel's AI Showrunner Rewrites the Story in Real-Time
 - Not a Chatbot, Not a Game — A Living World
