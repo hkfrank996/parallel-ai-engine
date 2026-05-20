@@ -1,6 +1,6 @@
 # Parallel — AI叙事世界引擎
 
-> [English version / 英文版](docs/PRODUCT_ROADMAP_EN.md)
+> [English version / 英文版](ROADMAP.md)
 
 > **一句话定义：** 你走进一个 AI 构建的世界，里面每个人都有自己的意志。你探索、对话、发现——而这个世界会根据你的一举一动，实时改变走向。
 >

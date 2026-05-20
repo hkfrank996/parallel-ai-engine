@@ -163,8 +163,8 @@ docs/         ARCHITECTURE.md、API.md
 
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — 目录结构、请求链路、Provider 系统、扩展层
 - **[docs/API.md](docs/API.md)** — API 端点参考
-- **[PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md)** — 产品愿景和版本历史（中文）
-- **[docs/PRODUCT_ROADMAP_EN.md](docs/PRODUCT_ROADMAP_EN.md)** — 产品路线图（英文）
+- **[docs/ROADMAP.md](docs/ROADMAP.md)** — Product roadmap (English)
+- **[docs/ROADMAP_ZH.md](docs/ROADMAP_ZH.md)** — 产品路线图（中文）
 
 ---
 

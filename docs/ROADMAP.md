@@ -1,5 +1,7 @@
 # Parallel — Product Roadmap
 
+> [中文版 / Chinese version](ROADMAP_ZH.md)
+
 > You walk into an AI-built world where everyone has their own will. You explore, talk, discover — and the world changes in real-time based on your every move.
 >
 > This is not a scripted game. This is a **living world**.
