@@ -16,10 +16,10 @@ export async function POST(req: NextRequest) {
     const existingSession = typeof sessionId === "string" ? getSession(sessionId) : null;
     const session = existingSession || getOrCreateSession(world.id);
 
-    const config = llmConfig?.apiKey ? {
+    const config = llmConfig?.providerType ? {
       providerType: llmConfig.providerType,
       apiUrl: llmConfig.apiUrl,
-      apiKey: llmConfig.apiKey,
+      apiKey: llmConfig.apiKey || "",
       model: llmConfig.model,
     } : undefined;
 

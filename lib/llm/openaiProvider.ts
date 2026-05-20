@@ -25,13 +25,16 @@ export class OpenAIProvider implements LLMProvider {
       let res: Response;
 
       try {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        };
+        if (this.apiKey) {
+          headers.Authorization = `Bearer ${this.apiKey}`;
+        }
         res = await fetch(endpoint, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${this.apiKey}`,
-          },
+          headers,
           body: JSON.stringify({
             model: this.model,
             messages: [

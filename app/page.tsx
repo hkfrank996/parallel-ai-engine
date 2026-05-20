@@ -266,7 +266,7 @@ export default function Home() {
     );
   }
 
-  const isMock = !loadSettings()?.apiKey && providerInfo.isMock;
+  const isMock = !loadSettings()?.providerType && providerInfo.isMock;
   const needsName = !playerName;
   const genreClass = getGenreClass(data.world.genre);
   const desktopGridClass = desktopInspectorOpen

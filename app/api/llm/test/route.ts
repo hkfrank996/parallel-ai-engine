@@ -8,11 +8,11 @@ export async function POST(req: NextRequest) {
     const config = body?.llmConfig as LLMConfig | undefined;
     const providerKey = (config?.providerType as ProviderKey) || "openai";
 
-    // Only Anthropic native API strictly requires a key.
-    // OpenAI-compatible providers may work without a key (local servers, Ollama).
-    if (providerKey === "anthropic" && !config?.apiKey?.trim()) {
+    // Providers that strictly require a key: anthropic (native), openrouter (hosted).
+    // OpenAI-compatible keyless providers (ollama, local servers) work without a key.
+    if ((providerKey === "anthropic" || providerKey === "openrouter") && !config?.apiKey?.trim()) {
       return NextResponse.json(
-        { ok: false, error: "API key is required for Anthropic" },
+        { ok: false, error: `API key is required for ${providerKey}` },
         { status: 400 }
       );
     }

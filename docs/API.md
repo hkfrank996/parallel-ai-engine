@@ -259,12 +259,13 @@ Test an LLM provider connection.
 |-------|------|----------|-------------|
 | `providerType` | string | No | `openai` / `anthropic` / `openrouter` / `ollama`. Defaults to `openai`. |
 | `apiUrl` | string | No | Provider base URL |
-| `apiKey` | string | Conditional | Required for `anthropic`. Optional for `openai`/`openrouter`/`ollama`. |
+| `apiKey` | string | Conditional | Required for `anthropic` and `openrouter`. Optional for `openai`/`ollama`. |
 | `model` | string | No | Model name |
 
 **Key behavior:**
-- **Anthropic native:** `apiKey` is required. Returns 400 if missing.
-- **OpenAI-compatible (openai/openrouter/ollama):** `apiKey` is optional. If omitted, the server will attempt to connect without authentication (useful for local servers like Ollama).
+- **Anthropic / OpenRouter:** `apiKey` is required. Returns 400 if missing.
+- **OpenAI-compatible (openai/ollama):** `apiKey` is optional. If omitted, the request is sent without an `Authorization` header (no fake token).
+- **Mock Mode:** Only when no provider is configured at all. Not triggered by an empty key.
 
 **Response (200):**
 
@@ -281,7 +282,7 @@ Test an LLM provider connection.
 
 | Status | Cause |
 |--------|-------|
-| 400 | Anthropic without API key, or provider resolved to Mock |
+| 400 | `anthropic` or `openrouter` without API key, or provider resolved to Mock |
 | 502 | Connection failed, timeout, or provider returned an error |
 
 ---

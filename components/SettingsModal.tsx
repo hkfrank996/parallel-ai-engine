@@ -234,9 +234,11 @@ export default function SettingsModal({ open, onClose }: Props) {
           </div>
 
           <p className="settings-note rounded-md border px-3 py-2 text-[11px] leading-relaxed">
-            {meta?.requiresKey
-              ? "Leave API Key empty to use Mock Mode. Settings are saved in your browser only."
-              : "No API key required. Settings are saved in your browser only."}
+            {providerType === "anthropic" || providerType === "openrouter"
+              ? "API key is required for this provider. Settings are saved in your browser only."
+              : providerType === "ollama"
+                ? "No API key needed for Ollama. Settings are saved in your browser only."
+                : "API key is optional (empty = no auth header). Settings are saved in your browser only."}
           </p>
 
           {testResult && (

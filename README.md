@@ -84,11 +84,11 @@ OPENAI_MODEL=mimo-v2.5
 
 | Provider | Protocol | Config Key | Requires API Key |
 |----------|----------|-----------|-----------------|
-| **OpenAI-compatible** | `/v1/chat/completions` | `OPENAI_API_KEY` | Yes |
-| **Anthropic** | `/v1/messages` | `ANTHROPIC_API_KEY` | Yes |
-| **OpenRouter** | `/v1/chat/completions` | `OPENROUTER_API_KEY` | Yes |
+| **OpenAI-compatible** | `/v1/chat/completions` | `OPENAI_API_KEY` | No (empty = no auth header) |
+| **Anthropic** | `/v1/messages` | `ANTHROPIC_API_KEY` | **Yes** |
+| **OpenRouter** | `/v1/chat/completions` | `OPENROUTER_API_KEY` | **Yes** |
 | **Ollama** | `/v1/chat/completions` | — | No |
-| **Mock Mode** | — | — | No |
+| **Mock Mode** | — | — | No (only when no provider configured) |
 
 The in-app Settings modal also supports provider selection and connection testing.
 

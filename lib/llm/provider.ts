@@ -34,16 +34,10 @@ export function getProvider(config?: LLMConfig): {
   // a specific provider — not Mock Mode. apiKey may be optional (e.g. Ollama).
   const hasExplicitConfig = config?.providerType || config?.apiUrl || config?.model;
   if (hasExplicitConfig) {
-    const meta = getProviderMeta(requestedProvider);
-    if (meta && !meta.requiresKey) {
-      // Provider doesn't need a key (e.g. ollama) — build with placeholder
-      return buildFromConfig(requestedProvider, configApiKey || requestedProvider, config);
-    }
-    // Provider requires key but user didn't provide one — still try to build
-    // (will fail at API call time, not silently fall back to Mock)
-    if (meta && meta.requiresKey) {
-      return buildFromConfig(requestedProvider, "", config);
-    }
+    // Pass real empty key — OpenAI-compatible providers handle it correctly
+    // (no Authorization header when key is empty). Providers that require
+    // a key (anthropic, openrouter) are validated at the API route level.
+    return buildFromConfig(requestedProvider, "", config);
   }
 
   // --- Env-based fallback ---
