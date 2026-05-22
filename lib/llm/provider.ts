@@ -97,6 +97,10 @@ function buildFromConfig(
 } {
   const meta = getProviderMeta(providerKey)!;
 
+  if (providerKey === "mock") {
+    return buildMock();
+  }
+
   if (providerKey === "anthropic") {
     const baseUrl = config?.apiUrl || process.env.ANTHROPIC_BASE_URL || meta.defaultBaseUrl;
     const model = config?.model || process.env.ANTHROPIC_MODEL || meta.defaultModel;

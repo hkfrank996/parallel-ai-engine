@@ -120,6 +120,7 @@ interface StoreData {
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const STORE_FILE = path.join(DATA_DIR, "store.json");
+const STORE_TMP_FILE = path.join(DATA_DIR, "store.json.tmp");
 
 function cloneEmptyStore(): StoreData {
   return {
@@ -168,7 +169,8 @@ function write(data: StoreData) {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
-  fs.writeFileSync(STORE_FILE, JSON.stringify(data, null, 2), "utf-8");
+  fs.writeFileSync(STORE_TMP_FILE, JSON.stringify(data, null, 2), "utf-8");
+  fs.renameSync(STORE_TMP_FILE, STORE_FILE);
 }
 
 export function getOrCreateSession(worldId: string): Session {

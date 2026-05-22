@@ -4,6 +4,7 @@ node_modules/
 *.db
 tsconfig.tsbuildinfo
 data/store.json
+data/store.json.tmp
 data/store.json.bak
 data/store.backup-*.json
 data/store.corrupt.*.json

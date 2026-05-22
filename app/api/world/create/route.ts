@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { worldSchema, World } from "@/lib/world/types";
-import { saveWorld, loadWorld } from "@/lib/world/loadWorld";
+import { worldSchema } from "@/lib/world/types";
+import { normalizeWorldId, saveWorld } from "@/lib/world/loadWorld";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +11,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Each character must have both a name and a role." }, { status: 400 });
     }
 
-    const safeId = world.id.replace(/[^a-z0-9-]/gi, "-").toLowerCase();
+    const safeId = normalizeWorldId(world.id);
+    if (!safeId) {
+      return NextResponse.json({ error: "World id must contain at least one letter or number." }, { status: 400 });
+    }
     world.id = safeId;
 
     saveWorld(world);

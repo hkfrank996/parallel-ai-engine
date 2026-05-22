@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { normalizeWorldId } from "@/lib/world/loadWorld";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const WORLDS_DIR = path.join(DATA_DIR, "worlds");
@@ -12,7 +13,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "worldId required" }, { status: 400 });
     }
 
-    const yamlPath = path.join(WORLDS_DIR, `${worldId}.yaml`);
+    const safeWorldId = normalizeWorldId(worldId);
+    if (!safeWorldId || safeWorldId !== worldId) {
+      return NextResponse.json({ error: "Invalid worldId" }, { status: 400 });
+    }
+
+    const yamlPath = path.join(WORLDS_DIR, `${safeWorldId}.yaml`);
     if (!fs.existsSync(yamlPath)) {
       return NextResponse.json({ error: "World not found" }, { status: 404 });
     }
@@ -34,6 +40,7 @@ export async function GET(req: NextRequest) {
           worldTime: (store.worldTime || []).find((t: { sessionId: string }) => t.sessionId === sid),
           relationships: (store.relationships || []).filter((r: { sessionId: string }) => r.sessionId === sid),
           relationshipHistory: (store.relationshipHistory || []).filter((h: { sessionId: string }) => h.sessionId === sid),
+          clues: (store.clues || []).filter((c: { sessionId: string }) => c.sessionId === sid),
         };
       }
     }

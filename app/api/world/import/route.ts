@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import yaml from "js-yaml";
-import { v4 as uuid } from "uuid";
 import { worldSchema } from "@/lib/world/types";
+import { normalizeWorldId } from "@/lib/world/loadWorld";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const WORLDS_DIR = path.join(DATA_DIR, "worlds");
 const STORE_FILE = path.join(DATA_DIR, "store.json");
+const STORE_TMP_FILE = path.join(DATA_DIR, "store.json.tmp");
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,14 +21,29 @@ export async function POST(req: NextRequest) {
 
     const parsed = yaml.load(yamlContent);
     const world = worldSchema.parse(parsed);
+    world.id = normalizeWorldId(world.id);
+    if (!world.id) {
+      return NextResponse.json({ error: "World id must contain at least one letter or number." }, { status: 400 });
+    }
 
     if (!fs.existsSync(WORLDS_DIR)) fs.mkdirSync(WORLDS_DIR, { recursive: true });
-    fs.writeFileSync(path.join(WORLDS_DIR, `${world.id}.yaml`), yamlContent, "utf-8");
+    fs.writeFileSync(path.join(WORLDS_DIR, `${world.id}.yaml`), yaml.dump(world, { lineWidth: -1, noRefs: true }), "utf-8");
 
     if (sessionData && Object.keys(sessionData).length > 0) {
       const store = fs.existsSync(STORE_FILE)
         ? JSON.parse(fs.readFileSync(STORE_FILE, "utf-8"))
-        : { sessions: [], messages: [], events: [], worldFacts: [], characterMemories: [], worldTime: [], relationships: [], worldEvents: [], relationshipHistory: [] };
+        : { sessions: [], messages: [], events: [], worldFacts: [], characterMemories: [], worldTime: [], relationships: [], worldEvents: [], relationshipHistory: [], clues: [] };
+
+      store.sessions ||= [];
+      store.messages ||= [];
+      store.events ||= [];
+      store.worldFacts ||= [];
+      store.characterMemories ||= [];
+      store.worldTime ||= [];
+      store.relationships ||= [];
+      store.worldEvents ||= [];
+      store.relationshipHistory ||= [];
+      store.clues ||= [];
 
       const sessionId = `session-${Date.now()}`;
       store.sessions.push({ id: sessionId, worldId: world.id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
@@ -40,8 +56,10 @@ export async function POST(req: NextRequest) {
       if (sessionData.worldTime) store.worldTime.push({ ...sessionData.worldTime, sessionId });
       if (sessionData.relationships) store.relationships.push(...remap(sessionData.relationships));
       if (sessionData.relationshipHistory) store.relationshipHistory.push(...remap(sessionData.relationshipHistory));
+      if (sessionData.clues) store.clues.push(...remap(sessionData.clues));
 
-      fs.writeFileSync(STORE_FILE, JSON.stringify(store, null, 2), "utf-8");
+      fs.writeFileSync(STORE_TMP_FILE, JSON.stringify(store, null, 2), "utf-8");
+      fs.renameSync(STORE_TMP_FILE, STORE_FILE);
     }
 
     return NextResponse.json({ success: true, worldId: world.id });

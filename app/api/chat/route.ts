@@ -15,7 +15,9 @@ export async function POST(req: NextRequest) {
 
     const world = worldId ? loadWorld(worldId) : loadDefaultWorld();
     const existingSession = typeof sessionId === "string" ? getSession(sessionId) : null;
-    const session = existingSession || getOrCreateSession(world.id);
+    const session = existingSession?.worldId === world.id
+      ? existingSession
+      : getOrCreateSession(world.id);
 
     // Providers that strictly require a key: anthropic (native), openrouter (hosted).
     // OpenAI-compatible keyless providers (ollama, local servers) work without a key.
