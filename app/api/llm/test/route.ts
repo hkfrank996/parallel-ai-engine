@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProvider, type LLMConfig } from "@/lib/llm/provider";
 import type { ProviderKey } from "@/lib/llm/catalog";
+import { assertSafeApiUrl, sanitizeError } from "@/lib/llm/validateUrl";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,11 @@ export async function POST(req: NextRequest) {
         { ok: false, error: `API key is required for ${providerKey}` },
         { status: 400 }
       );
+    }
+
+    // SSRF protection — validate apiUrl before passing to provider
+    if (config?.apiUrl) {
+      assertSafeApiUrl(config.apiUrl, providerKey === "ollama");
     }
 
     const { provider, isMock, providerType, model } = getProvider(config);
@@ -34,7 +40,7 @@ export async function POST(req: NextRequest) {
       preview: text.slice(0, 160),
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ ok: false, error: message }, { status: 502 });
+    console.error("LLM test error:", error);
+    return NextResponse.json({ ok: false, error: sanitizeError(error) }, { status: 502 });
   }
 }

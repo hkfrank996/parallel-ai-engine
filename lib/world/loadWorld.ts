@@ -14,7 +14,7 @@ export function normalizeWorldId(worldId: string): string {
     .toLowerCase();
 }
 
-function assertSafeWorldId(worldId: string): string {
+export function assertSafeWorldId(worldId: string): string {
   const normalized = normalizeWorldId(worldId);
   if (!normalized || normalized !== worldId) {
     throw new Error(`Invalid world id: ${worldId}`);
@@ -29,7 +29,7 @@ export function loadWorld(worldId: string): World {
     throw new Error(`World not found: ${safeWorldId}`);
   }
   const raw = fs.readFileSync(filePath, "utf-8");
-  const parsed = yaml.load(raw);
+  const parsed = yaml.load(raw, { schema: yaml.CORE_SCHEMA });
   return worldSchema.parse(parsed);
 }
 
@@ -43,7 +43,7 @@ export function listWorlds(): { id: string; name: string; genre: string; tagline
   return files.map((f) => {
     try {
       const raw = fs.readFileSync(path.join(WORLDS_DIR, f), "utf-8");
-      const parsed = yaml.load(raw) as Record<string, unknown>;
+      const parsed = yaml.load(raw, { schema: yaml.CORE_SCHEMA }) as Record<string, unknown>;
       return {
         id: (parsed.id as string) || f.replace(".yaml", ""),
         name: (parsed.name as string) || f,

@@ -178,7 +178,7 @@ export function getOrCreateSession(worldId: string): Session {
   let session = data.sessions.find((s) => s.worldId === worldId);
   if (!session) {
     session = {
-      id: `session-${Date.now()}`,
+      id: `session-${uuid()}`,
       worldId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -327,4 +327,79 @@ export function addClue(clue: Clue) {
 
 export function getClues(sessionId: string): Clue[] {
   return read().clues.filter((c) => c.sessionId === sessionId);
+}
+
+export function findSessionByWorldId(worldId: string): Session | undefined {
+  return read().sessions.find((s) => s.worldId === worldId);
+}
+
+export function getSessionDataForExport(sessionId: string) {
+  const data = read();
+  return {
+    messages: data.messages.filter((m) => m.sessionId === sessionId),
+    events: data.events.filter((e) => e.sessionId === sessionId),
+    worldFacts: data.worldFacts.filter((f) => f.sessionId === sessionId),
+    characterMemories: data.characterMemories.filter((m) => m.sessionId === sessionId),
+    worldEvents: data.worldEvents.filter((e) => e.sessionId === sessionId),
+    worldTime: data.worldTime.find((t) => t.sessionId === sessionId) || null,
+    relationships: data.relationships.filter((r) => r.sessionId === sessionId),
+    relationshipHistory: data.relationshipHistory.filter((h) => h.sessionId === sessionId),
+    clues: data.clues.filter((c) => c.sessionId === sessionId),
+  };
+}
+
+export function importSessionData(
+  sessionId: string,
+  worldId: string,
+  sessionData: {
+    messages?: Message[];
+    events?: SessionEvent[];
+    worldFacts?: WorldFact[];
+    characterMemories?: CharacterMemory[];
+    worldTime?: WorldTime;
+    relationships?: Relationship[];
+    worldEvents?: WorldEvent[];
+    relationshipHistory?: RelationshipHistory[];
+    clues?: Clue[];
+  }
+) {
+  const data = read();
+
+  const existingIdx = data.sessions.findIndex((s) => s.id === sessionId);
+  if (existingIdx >= 0) {
+    data.sessions[existingIdx].updatedAt = new Date().toISOString();
+  } else {
+    data.sessions.push({
+      id: sessionId,
+      worldId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  // Clear existing session data before importing to prevent duplicates
+  data.messages = data.messages.filter((m) => m.sessionId !== sessionId);
+  data.events = data.events.filter((e) => e.sessionId !== sessionId);
+  data.worldFacts = data.worldFacts.filter((f) => f.sessionId !== sessionId);
+  data.characterMemories = data.characterMemories.filter((m) => m.sessionId !== sessionId);
+  data.worldTime = data.worldTime.filter((w) => w.sessionId !== sessionId);
+  data.relationships = data.relationships.filter((r) => r.sessionId !== sessionId);
+  data.worldEvents = data.worldEvents.filter((e) => e.sessionId !== sessionId);
+  data.relationshipHistory = data.relationshipHistory.filter((h) => h.sessionId !== sessionId);
+  data.clues = data.clues.filter((c) => c.sessionId !== sessionId);
+
+  const remap = <T extends { sessionId: string }>(arr: T[]) =>
+    arr.map((item) => ({ ...item, sessionId }));
+
+  if (sessionData.messages) data.messages.push(...remap(sessionData.messages));
+  if (sessionData.events) data.events.push(...remap(sessionData.events));
+  if (sessionData.worldFacts) data.worldFacts.push(...remap(sessionData.worldFacts));
+  if (sessionData.characterMemories) data.characterMemories.push(...remap(sessionData.characterMemories));
+  if (sessionData.worldTime) data.worldTime.push({ ...sessionData.worldTime, sessionId });
+  if (sessionData.relationships) data.relationships.push(...remap(sessionData.relationships));
+  if (sessionData.worldEvents) data.worldEvents.push(...remap(sessionData.worldEvents));
+  if (sessionData.relationshipHistory) data.relationshipHistory.push(...remap(sessionData.relationshipHistory));
+  if (sessionData.clues) data.clues.push(...remap(sessionData.clues));
+
+  write(data);
 }

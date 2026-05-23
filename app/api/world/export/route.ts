@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { normalizeWorldId } from "@/lib/world/loadWorld";
+import { assertSafeWorldId } from "@/lib/world/loadWorld";
+import { findSessionByWorldId, getSessionDataForExport } from "@/lib/storage/store";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const WORLDS_DIR = path.join(DATA_DIR, "worlds");
+const WORLDS_DIR = path.join(process.cwd(), "data", "worlds");
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,10 +13,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "worldId required" }, { status: 400 });
     }
 
-    const safeWorldId = normalizeWorldId(worldId);
-    if (!safeWorldId || safeWorldId !== worldId) {
-      return NextResponse.json({ error: "Invalid worldId" }, { status: 400 });
-    }
+    const safeWorldId = assertSafeWorldId(worldId);
 
     const yamlPath = path.join(WORLDS_DIR, `${safeWorldId}.yaml`);
     if (!fs.existsSync(yamlPath)) {
@@ -25,33 +22,20 @@ export async function GET(req: NextRequest) {
 
     const worldYaml = fs.readFileSync(yamlPath, "utf-8");
 
-    const storePath = path.join(DATA_DIR, "store.json");
     let sessionData = {};
-    if (fs.existsSync(storePath)) {
-      const store = JSON.parse(fs.readFileSync(storePath, "utf-8"));
-      const session = store.sessions?.find((s: { worldId: string }) => s.worldId === worldId);
-      if (session) {
-        const sid = session.id;
-        sessionData = {
-          messages: (store.messages || []).filter((m: { sessionId: string }) => m.sessionId === sid),
-          worldFacts: (store.worldFacts || []).filter((f: { sessionId: string }) => f.sessionId === sid),
-          characterMemories: (store.characterMemories || []).filter((m: { sessionId: string }) => m.sessionId === sid),
-          worldEvents: (store.worldEvents || []).filter((e: { sessionId: string }) => e.sessionId === sid),
-          worldTime: (store.worldTime || []).find((t: { sessionId: string }) => t.sessionId === sid),
-          relationships: (store.relationships || []).filter((r: { sessionId: string }) => r.sessionId === sid),
-          relationshipHistory: (store.relationshipHistory || []).filter((h: { sessionId: string }) => h.sessionId === sid),
-          clues: (store.clues || []).filter((c: { sessionId: string }) => c.sessionId === sid),
-        };
-      }
+    const session = findSessionByWorldId(safeWorldId);
+    if (session) {
+      sessionData = getSessionDataForExport(session.id);
     }
 
     return NextResponse.json({
-      worldId,
+      worldId: safeWorldId,
       yaml: worldYaml,
       sessionData,
       exportedAt: new Date().toISOString(),
     });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    console.error("World export error:", e);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

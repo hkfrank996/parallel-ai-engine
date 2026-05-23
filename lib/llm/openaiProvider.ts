@@ -57,14 +57,15 @@ export class OpenAIProvider implements LLMProvider {
 
       if (!res.ok) {
         const text = await res.text();
-        lastError = `OpenAI API error ${res.status} at ${endpoint}: ${text}`;
+        console.error("OpenAI API error body:", text.slice(0, 1000));
+        lastError = `OpenAI API error ${res.status}`;
         if (shouldTryNextEndpoint(res.status)) continue;
         throw new Error(lastError);
       }
 
       const text = await res.text();
       if (looksLikeHtml(text, res.headers.get("content-type"))) {
-        lastError = `OpenAI API endpoint returned HTML at ${endpoint}`;
+        lastError = `OpenAI API endpoint returned HTML (status ${res.status})`;
         continue;
       }
 
@@ -72,18 +73,18 @@ export class OpenAIProvider implements LLMProvider {
         const data = parseOpenAIResponse(text);
         const content = extractText(data);
         if (!content) {
-          lastError = `OpenAI API empty response from ${endpoint}: ${text.slice(0, 300)}`;
+          lastError = "OpenAI API empty response";
           continue;
         }
         return content;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        lastError = `${message} at ${endpoint}`;
+        lastError = message;
         continue;
       }
     }
 
-    throw new Error(lastError || `OpenAI API failed at ${lastEndpoint}`);
+    throw new Error(lastError || "OpenAI API request failed");
   }
 }
 

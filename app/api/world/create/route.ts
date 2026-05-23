@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { worldSchema } from "@/lib/world/types";
 import { normalizeWorldId, saveWorld } from "@/lib/world/loadWorld";
+import { sanitizeError } from "@/lib/llm/validateUrl";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, worldId: world.id });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: message }, { status: 400 });
+    console.error("World create error:", e);
+    return NextResponse.json({ error: sanitizeError(e) }, { status: 400 });
   }
 }

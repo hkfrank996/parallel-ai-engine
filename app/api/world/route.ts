@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { loadDefaultWorld, loadWorld, listWorlds } from "@/lib/world/loadWorld";
 import { getOrCreateSession, getMessages, getEvents, getWorldFacts, getCharacterMemories, getWorldTime, getRelationships, getWorldEvents, getRelationshipHistory, getClues } from "@/lib/storage/store";
 import { getProvider } from "@/lib/llm/provider";
+import { sanitizeError } from "@/lib/llm/validateUrl";
 
 export async function GET(req: NextRequest) {
   try {
@@ -32,8 +33,9 @@ export async function GET(req: NextRequest) {
       worldTime, relationships, worldEvents, relationshipHistory, clues, isMock, providerType,
     });
   } catch (e) {
+    console.error("World API error:", e);
     return NextResponse.json(
-      { error: String(e) },
+      { error: sanitizeError(e) },
       { status: 500 }
     );
   }

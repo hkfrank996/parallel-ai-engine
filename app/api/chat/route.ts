@@ -3,6 +3,7 @@ import { loadDefaultWorld, loadWorld } from "@/lib/world/loadWorld";
 import { getOrCreateSession, getSession } from "@/lib/storage/store";
 import { runTurn } from "@/lib/engine/runTurn";
 import type { ProviderKey } from "@/lib/llm/catalog";
+import { assertSafeApiUrl, sanitizeError } from "@/lib/llm/validateUrl";
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,6 +30,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // SSRF protection — validate apiUrl before passing to provider
+    if (llmConfig?.apiUrl) {
+      assertSafeApiUrl(llmConfig.apiUrl, providerKey === "ollama");
+    }
+
     const config = llmConfig?.providerType ? {
       providerType: llmConfig.providerType,
       apiUrl: llmConfig.apiUrl,
@@ -44,7 +50,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error("Chat API error:", e);
     return NextResponse.json(
-      { error: String(e) },
+      { error: sanitizeError(e) },
       { status: 500 }
     );
   }

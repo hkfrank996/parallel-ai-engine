@@ -12,6 +12,8 @@ data/final_t*.json
 data/full_t*.json
 data/mimo_test.json
 data/t1_result.json
+data/worlds/test-*.yaml
 .chrome-*
 qa-*.png
 *.log
+CODEX_HANDOFF.md
