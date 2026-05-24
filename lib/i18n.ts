@@ -9,6 +9,9 @@ const t: Record<string, { zh: string; en: string }> = {
   // Header
   "header.newWorld": { zh: "创建世界", en: "New World" },
   "header.switchWorld": { zh: "切换世界", en: "Switch World" },
+  "header.reset": { zh: "清空记录", en: "Reset" },
+  "header.resetConfirm": { zh: "确认清空？再次点击", en: "Confirm reset? Click again" },
+  "header.resetConfirmShort": { zh: "确认清空？", en: "Confirm?" },
 
   // Sidebar tabs
   "tab.world": { zh: "世界", en: "World" },

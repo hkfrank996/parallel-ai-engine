@@ -94,6 +94,7 @@ export default function Home() {
   const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
   const [desktopInspectorOpen, setDesktopInspectorOpen] = useState(true);
   const [worldPulseCollapsed, setWorldPulseCollapsed] = useState(false);
+  const [resetPending, setResetPending] = useState(false);
   const { uiTheme, setUiTheme, themeReady } = useUiTheme();
 
   const loadWorld = useCallback(async (worldId?: string) => {
@@ -239,6 +240,30 @@ export default function Home() {
     setShowWorldPicker(false);
   };
 
+  const handleReset = async () => {
+    if (!data) return;
+    if (!resetPending) {
+      setResetPending(true);
+      setTimeout(() => setResetPending(false), 3000);
+      return;
+    }
+    setResetPending(false);
+    try {
+      const res = await fetch("/api/world/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ worldId: data.world.id }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Reset failed");
+      }
+      await loadWorld(data.world.id);
+    } catch (e) {
+      setError(String(e));
+    }
+  };
+
   const L = (key: string, vars?: Record<string, string | number>) => T(key, language, vars);
 
   if (loading) {
@@ -380,6 +405,19 @@ export default function Home() {
             className="chrome-button hidden rounded border px-1.5 py-1 text-[10px] font-medium transition min-[430px]:inline-flex sm:px-2"
           >
             {language === "zh" ? "中文" : "EN"}
+          </button>
+          <button
+            onClick={handleReset}
+            className={`chrome-button inline-flex h-7 min-w-7 items-center justify-center rounded border px-1.5 text-[10px] font-medium transition sm:min-w-14 sm:px-2 ${
+              resetPending ? "border-crimson/50 text-crimson-bright/80" : ""
+            }`}
+            title={resetPending ? L("header.resetConfirm") : L("header.reset")}
+            aria-label={resetPending ? L("header.resetConfirm") : L("header.reset")}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:hidden">
+              <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            </svg>
+            <span className="hidden sm:inline">{resetPending ? L("header.resetConfirmShort") : L("header.reset")}</span>
           </button>
           <button
             onClick={() => setSettingsOpen(true)}

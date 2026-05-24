@@ -58,12 +58,14 @@ vi.mock("process", async (importOriginal) => {
 // ── Import the store module AFTER mocks are installed ─────────
 import {
   importSessionData,
+  clearSessionData,
   getMessages,
   getEvents,
   getWorldFacts,
   getCharacterMemories,
   getRelationships,
   getWorldEvents,
+  getRelationshipHistory,
   getClues,
 } from "./store";
 
@@ -250,5 +252,77 @@ describe("importSessionData — dedup on re-import", () => {
     expect(getMessages(sidA)).toHaveLength(1);
     expect(getMessages(sidB)).toHaveLength(1);
     expect(getMessages(sidB)[0].id).toBe("b1");
+  });
+});
+
+describe("clearSessionData", () => {
+  it("clears all session data for the given session", () => {
+    const sid = "session-clear";
+    const sessionData = {
+      messages: [
+        { id: "msg-1", sessionId: "orig", speakerType: "user" as const, speakerId: "p1", speakerName: "A", content: "T", createdAt: "2026-05-23T00:00:00Z" },
+      ],
+      events: [
+        { id: "evt-1", sessionId: "orig", summary: "E", turnIndex: 0, createdAt: "2026-05-23T00:00:00Z" },
+      ],
+      worldFacts: [
+        { id: "fact-1", sessionId: "orig", fact: "F", turnIndex: 0, createdAt: "2026-05-23T00:00:00Z" },
+      ],
+      characterMemories: [
+        { id: "mem-1", sessionId: "orig", characterId: "c1", category: "impression" as const, about: "S", content: "M", turnIndex: 0, createdAt: "2026-05-23T00:00:00Z" },
+      ],
+      worldTime: { sessionId: "orig", day: 3, timeOfDay: "night" as const, turnCount: 20 },
+      relationships: [
+        { id: "rel-1", sessionId: "orig", fromId: "c1", toId: "c2", trust: 50, hostility: 0, dependency: 0, turnIndex: 0, updatedAt: "2026-05-23T00:00:00Z" },
+      ],
+      worldEvents: [
+        { id: "we-1", sessionId: "orig", type: "environment" as const, description: "D", impact: "I", turnIndex: 0, createdAt: "2026-05-23T00:00:00Z" },
+      ],
+      relationshipHistory: [
+        { id: "rh-1", sessionId: "orig", fromId: "c1", toId: "c2", previousTrust: 50, previousHostility: 0, previousDependency: 0, newTrust: 60, newHostility: 0, newDependency: 0, reason: "helped", turnIndex: 1, createdAt: "2026-05-23T00:00:00Z" },
+      ],
+      clues: [
+        { id: "clue-1", sessionId: "orig", name: "C", description: "D", source: "dialogue" as const, turnIndex: 0, createdAt: "2026-05-23T00:00:00Z" },
+      ],
+    };
+
+    importSessionData(sid, "w", sessionData);
+    expect(getMessages(sid)).toHaveLength(1);
+    expect(getRelationshipHistory(sid)).toHaveLength(1);
+
+    clearSessionData(sid);
+
+    expect(getMessages(sid)).toHaveLength(0);
+    expect(getEvents(sid)).toHaveLength(0);
+    expect(getWorldFacts(sid)).toHaveLength(0);
+    expect(getCharacterMemories(sid)).toHaveLength(0);
+    expect(getRelationships(sid)).toHaveLength(0);
+    expect(getWorldEvents(sid)).toHaveLength(0);
+    expect(getRelationshipHistory(sid)).toHaveLength(0);
+    expect(getClues(sid)).toHaveLength(0);
+  });
+
+  it("does not affect other sessions", () => {
+    const sidA = "session-clear-a";
+    const sidB = "session-clear-b";
+
+    const msgsA = [
+      { id: "a1", sessionId: "orig", speakerType: "user" as const, speakerId: "p1", speakerName: "A", content: "From A", createdAt: "2026-05-23T00:00:00Z" },
+    ];
+    const msgsB = [
+      { id: "b1", sessionId: "orig", speakerType: "user" as const, speakerId: "p2", speakerName: "B", content: "From B", createdAt: "2026-05-23T00:00:00Z" },
+    ];
+
+    importSessionData(sidA, "w-a", { messages: msgsA });
+    importSessionData(sidB, "w-b", { messages: msgsB });
+
+    clearSessionData(sidA);
+
+    expect(getMessages(sidA)).toHaveLength(0);
+    expect(getMessages(sidB)).toHaveLength(1);
+  });
+
+  it("is safe to call on a session with no data", () => {
+    expect(() => clearSessionData("nonexistent-session")).not.toThrow();
   });
 });

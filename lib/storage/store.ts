@@ -349,6 +349,20 @@ export function getSessionDataForExport(sessionId: string) {
   };
 }
 
+export function clearSessionData(sessionId: string): void {
+  const data = read();
+  data.messages = data.messages.filter((m) => m.sessionId !== sessionId);
+  data.events = data.events.filter((e) => e.sessionId !== sessionId);
+  data.worldFacts = data.worldFacts.filter((f) => f.sessionId !== sessionId);
+  data.characterMemories = data.characterMemories.filter((m) => m.sessionId !== sessionId);
+  data.worldTime = data.worldTime.filter((w) => w.sessionId !== sessionId);
+  data.relationships = data.relationships.filter((r) => r.sessionId !== sessionId);
+  data.worldEvents = data.worldEvents.filter((e) => e.sessionId !== sessionId);
+  data.relationshipHistory = data.relationshipHistory.filter((h) => h.sessionId !== sessionId);
+  data.clues = data.clues.filter((c) => c.sessionId !== sessionId);
+  write(data);
+}
+
 export function importSessionData(
   sessionId: string,
   worldId: string,
@@ -377,30 +391,24 @@ export function importSessionData(
       updatedAt: new Date().toISOString(),
     });
   }
+  write(data);
 
   // Clear existing session data before importing to prevent duplicates
-  data.messages = data.messages.filter((m) => m.sessionId !== sessionId);
-  data.events = data.events.filter((e) => e.sessionId !== sessionId);
-  data.worldFacts = data.worldFacts.filter((f) => f.sessionId !== sessionId);
-  data.characterMemories = data.characterMemories.filter((m) => m.sessionId !== sessionId);
-  data.worldTime = data.worldTime.filter((w) => w.sessionId !== sessionId);
-  data.relationships = data.relationships.filter((r) => r.sessionId !== sessionId);
-  data.worldEvents = data.worldEvents.filter((e) => e.sessionId !== sessionId);
-  data.relationshipHistory = data.relationshipHistory.filter((h) => h.sessionId !== sessionId);
-  data.clues = data.clues.filter((c) => c.sessionId !== sessionId);
+  clearSessionData(sessionId);
+  const freshData = read();
 
   const remap = <T extends { sessionId: string }>(arr: T[]) =>
     arr.map((item) => ({ ...item, sessionId }));
 
-  if (sessionData.messages) data.messages.push(...remap(sessionData.messages));
-  if (sessionData.events) data.events.push(...remap(sessionData.events));
-  if (sessionData.worldFacts) data.worldFacts.push(...remap(sessionData.worldFacts));
-  if (sessionData.characterMemories) data.characterMemories.push(...remap(sessionData.characterMemories));
-  if (sessionData.worldTime) data.worldTime.push({ ...sessionData.worldTime, sessionId });
-  if (sessionData.relationships) data.relationships.push(...remap(sessionData.relationships));
-  if (sessionData.worldEvents) data.worldEvents.push(...remap(sessionData.worldEvents));
-  if (sessionData.relationshipHistory) data.relationshipHistory.push(...remap(sessionData.relationshipHistory));
-  if (sessionData.clues) data.clues.push(...remap(sessionData.clues));
+  if (sessionData.messages) freshData.messages.push(...remap(sessionData.messages));
+  if (sessionData.events) freshData.events.push(...remap(sessionData.events));
+  if (sessionData.worldFacts) freshData.worldFacts.push(...remap(sessionData.worldFacts));
+  if (sessionData.characterMemories) freshData.characterMemories.push(...remap(sessionData.characterMemories));
+  if (sessionData.worldTime) freshData.worldTime.push({ ...sessionData.worldTime, sessionId });
+  if (sessionData.relationships) freshData.relationships.push(...remap(sessionData.relationships));
+  if (sessionData.worldEvents) freshData.worldEvents.push(...remap(sessionData.worldEvents));
+  if (sessionData.relationshipHistory) freshData.relationshipHistory.push(...remap(sessionData.relationshipHistory));
+  if (sessionData.clues) freshData.clues.push(...remap(sessionData.clues));
 
-  write(data);
+  write(freshData);
 }
