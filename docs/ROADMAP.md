@@ -55,7 +55,7 @@ Playable → Memorable → Mutable → Buildable → Shareable → Release
 | v1.0-P1 | Stable Layer | Security hardening, test suite, import safety | SSRF protection, error sanitization, 47 tests | ✅ |
 | v1.0-P2 | Showcase Worlds | 9 demo worlds spanning 4 genres | Instant product demonstration | ✅ |
 | v1.0-P3 | Release Docs | README, docs/, package review | Handoff-ready documentation | ✅ |
-| v1.0-P4 | Pre-release QA | Polish, harden, accessibility | Production-quality validation | ⬜ |
+| v1.0-P4 | Pre-release QA | Polish, harden, accessibility | Production-quality validation | ✅ |
 | v1.0 | Release | Polished public release | Complete docs, demo deployment, v1.0 tag | ⬜ |
 
 ---
@@ -371,14 +371,21 @@ Character.AI is chat. SillyTavern is roleplay. Parallel is a **living world simu
 
 ---
 
-## v1.0 Phase 4 — Pre-release QA ⬜
+## v1.0 Phase 4 — Pre-release QA ✅
 
 **Goal:** Production-quality hardening without changing core features.
 
-### Scope
-- Race condition mitigation for `store.ts` (concurrent write safety)
-- API authentication (optional, for multi-user deployments)
-- Performance profiling for large sessions (1000+ messages)
+### Implemented
+- AnthropicProvider request timeout (AbortController, matching OpenAIProvider)
+- Store corruption logging (console.error before backup/reset)
+- CI lockfile sync (package-lock.json regenerated)
+- Browser UI smoke test (Playwright headless, 10/11 passed)
+- Security reviewer: 0 CRITICAL, 0 HIGH
+
+### Deferred (not blocking v1.0)
+- Race condition mitigation for `store.ts` (single-user acceptable)
+- API authentication (single-user acceptable)
+- Performance profiling for large sessions
 - Accessibility audit (ARIA, keyboard navigation, screen reader)
 - Mobile responsive polish
 - Error boundary components
@@ -386,15 +393,23 @@ Character.AI is chat. SillyTavern is roleplay. Parallel is a **living world simu
 
 ---
 
-## v1.0 — Closeout ⬜
+## v1.0 — Closeout (ready)
 
 **Goal:** Tag, release, and ship.
 
-### Scope
-- Version bump to `1.0.0` in `package.json`
-- GitHub Release with tag `v1.0.0` and changelog
-- Demo deployment (Vercel or Docker)
-- Community world template submission guide
+### Ready
+- Version bump to `1.0.0` in `package.json` + `package-lock.json`
+- CHANGELOG.md with full v1.0.0 history
+- docs/RELEASE_NOTES_v1.0.0.md (GitHub Release draft)
+- README.md / README_ZH.md status updated to "v1.0.0 ready for release"
+- Security scan clean (0 unsafe hits)
+- CI green on master
+
+### Pending
+- Commit and push
+- Create v1.0.0 tag
+- GitHub Release
+- Demo deployment
 
 ---
 

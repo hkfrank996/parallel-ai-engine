@@ -181,13 +181,13 @@ Constraints: max 500 KB YAML, max 10,000 session entries. Import validates befor
 
 ## Current Status
 
-**Pre-v1.0 — Phase 1 + Phase 2 + Phase 3 completed, Phase 4 pending**
+**v1.0.0 ready for release (2026-05-24)**
 
 - Phase 1 (Stable Layer): SSRF protection, error sanitization, test suite ✅
 - Phase 2 (Showcase Worlds): 9 demo worlds across 4 genres ✅
 - Phase 3 (Release Docs): README, docs/, package review ✅
-- Phase 4 (Pre-release QA): Pending
-- v1.0 Closeout: Pending
+- Phase 4 (Pre-release QA): Security review, browser smoke, CI green ✅
+- v1.0 Closeout: Version bump, CHANGELOG, release notes ready ✅
 
 ## License
 

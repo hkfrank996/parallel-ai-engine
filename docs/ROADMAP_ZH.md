@@ -55,7 +55,7 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 | v1.0-P1 | 稳定层 | 安全加固、测试套件、导入安全 | SSRF 防护、错误脱敏、47 个测试 | ✅ |
 | v1.0-P2 | 展示世界 | 9 个演示世界覆盖 4 种类型 | 即时展示产品能力 | ✅ |
 | v1.0-P3 | 发布文档 | README、docs/、package 审查 | 可交接的文档 | ✅ |
-| v1.0-P4 | 发布前 QA | 打磨、加固、无障碍 | 生产级质量验证 | ⬜ |
+| v1.0-P4 | 发布前 QA | 打磨、加固、无障碍 | 生产级质量验证 | ✅ |
 | v1.0 | Release | 打磨后的公开发布 | 完整文档、demo 部署、v1.0 tag | ⬜ |
 
 ---
@@ -423,14 +423,21 @@ Character.AI is chat. SillyTavern is roleplay. Parallel is a **living world simu
 
 ---
 
-## v1.0 Phase 4 — 发布前 QA ⬜
+## v1.0 Phase 4 — 发布前 QA ✅
 
 **目标：** 不改核心功能的生产级加固。
 
-### 范围
-- `store.ts` 竞态条件缓解
-- API 认证（可选，面向多用户部署）
-- 大会话性能分析（1000+ 消息）
+### 已实现
+- AnthropicProvider 请求超时（AbortController，与 OpenAIProvider 一致）
+- Store 损坏日志（备份/重置前 console.error）
+- CI lockfile 同步（package-lock.json 重新生成）
+- 浏览器 UI smoke 测试（Playwright headless，10/11 通过）
+- 安全审查：0 CRITICAL，0 HIGH
+
+### 延后（不阻塞 v1.0）
+- `store.ts` 竞态条件缓解（单用户可接受）
+- API 认证（单用户可接受）
+- 大会话性能分析
 - 无障碍审计（ARIA、键盘导航、屏幕阅读器）
 - 移动端响应式打磨
 - Error boundary 组件
@@ -438,15 +445,23 @@ Character.AI is chat. SillyTavern is roleplay. Parallel is a **living world simu
 
 ---
 
-## v1.0 — 收口 ⬜
+## v1.0 — 收口（已准备）
 
 **目标：** 打 tag、发 release、上线。
 
-### 范围
-- `package.json` 版本升至 `1.0.0`
-- GitHub Release tag `v1.0.0` + changelog
-- Demo 部署（Vercel 或 Docker）
-- 社区世界模板提交指南
+### 已准备
+- `package.json` + `package-lock.json` 版本升至 `1.0.0`
+- CHANGELOG.md 完整 v1.0.0 历史
+- docs/RELEASE_NOTES_v1.0.0.md（GitHub Release 草稿）
+- README.md / README_ZH.md 状态更新为 "v1.0.0 已准备发布"
+- 安全扫描干净（0 unsafe 命中）
+- CI master 分支全绿
+
+### 待完成
+- 提交并推送
+- 创建 v1.0.0 tag
+- GitHub Release
+- Demo 部署
 
 ---
 
