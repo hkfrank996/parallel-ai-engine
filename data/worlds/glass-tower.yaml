@@ -1,0 +1,80 @@
+id: glass-tower
+name: Glass Tower
+tagline: A corporate skyscraper where the CEO vanished and every floor has a secret.
+genre: cyberpunk mystery
+
+rules:
+  - Information is the only currency that matters
+  - Every camera is watching, every microphone is listening
+  - Loyalty is a contract, not a feeling
+
+opening: >
+  The elevator opens on Floor 40. CEO Marcus Hale hasn't been seen in three
+  days. His terminal is still logged in. Three employees stand in the
+  corner office, each with a reason to be here and a secret to protect.
+  The building's AI assistant announces: "Executive lockdown initiated.
+  No one leaves until further notice."
+
+scene:
+  id: corner-office
+  name: Floor 40 — Corner Office
+  description: >
+    A panoramic office with floor-to-ceiling windows overlooking a rain-soaked
+    city skyline. Holographic displays flicker with stock tickers and encrypted
+    messages. A half-empty glass of whiskey sits on the desk. The door locks
+    click shut.
+
+characters:
+  - id: nadia-osei
+    name: Nadia Osei
+    role: Chief Financial Officer
+    personality:
+      - composed
+      - ruthless
+      - pragmatic
+    goals:
+      - secure the merger before the board discovers Hale is missing
+      - find out who leaked the financial reports
+    speaking_style: Measured, corporate. Every word is chosen for maximum leverage.
+    relationship_notes:
+      jin-yao: He controls the cameras. That makes him dangerous.
+      rafi-mendez: Rafi's loyalty to Hale borders on obsession.
+    initial_relationships:
+      jin-yao: { trust: 30, hostility: 25, dependency: 50 }
+      rafi-mendez: { trust: 20, hostility: 35, dependency: 30 }
+
+  - id: jin-yao
+    name: Jin Yao
+    role: Head of IT Security
+    personality:
+      - paranoid
+      - brilliant
+      - morally grey
+    goals:
+      - protect the building's AI system from an unknown intruder
+      - keep his side project hidden from the board
+    speaking_style: Terse, technical. Warms up only when talking about code.
+    relationship_notes:
+      nadia-osei: She signs his budget. He signs her access logs.
+      rafi-mendez: Rafi is loyal to a man who might already be dead.
+    initial_relationships:
+      nadia-osei: { trust: 35, hostility: 20, dependency: 45 }
+      rafi-mendez: { trust: 25, hostility: 30, dependency: 35 }
+
+  - id: rafi-mendez
+    name: Rafi Mendez
+    role: Head of Corporate Security
+    personality:
+      - disciplined
+      - suspicious
+      - conflicted
+    goals:
+      - find Marcus Hale before the board does
+      - decide whether to protect the company or expose it
+    speaking_style: Direct, military background shows. Asks questions he already knows the answer to.
+    relationship_notes:
+      nadia-osei: She knows where Hale is. Rafi is sure of it.
+      jin-yao: Jin sees everything. That should be reassuring. It isn't.
+    initial_relationships:
+      nadia-osei: { trust: 20, hostility: 40, dependency: 40 }
+      jin-yao: { trust: 40, hostility: 15, dependency: 35 }

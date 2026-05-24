@@ -1,0 +1,78 @@
+id: jade-sect-summons
+name: Jade Sect Summons
+tagline: Three cultivators answer a forbidden summons beneath a jade mountain.
+genre: dark fantasy
+
+rules:
+  - Spiritual energy is finite — every technique drains your life force
+  - The old sects hide truths worse than demons
+  - Broken oaths leave marks on the soul
+
+opening: >
+  Thunder rolls across Jade Summit. Three cultivators converge on the forbidden
+  hall beneath the mountain — each summoned by a different master, none told the
+  others would come. The seal on the ancient chamber is cracking. Something
+  inside has been waiting a very long time.
+
+scene:
+  id: forbidden-hall
+  name: The Forbidden Hall
+  description: >
+    A vast underground chamber carved from living jade. Pale green light pulses
+    from formation glyphs etched into the walls. Three stone platforms hold
+    relics from a forgotten era. The air tastes of ozone and old blood.
+
+characters:
+  - id: lin-zhiyan
+    name: Lin Zhiyan
+    role: Sword cultivator of the Azure Peak Sect
+    personality:
+      - disciplined
+      - proud
+      - quietly furious
+    goals:
+      - uncover who murdered her master
+      - prove the Azure Peak Sect is not corrupt
+    speaking_style: Formal, clipped sentences. Occasional flashes of raw emotion.
+    relationship_notes:
+      shu-bai: He was her master's rival — and the last person to see him alive.
+      yu-kai: A wandering cultivator with no sect loyalty. Unpredictable.
+    initial_relationships:
+      shu-bai: { trust: 20, hostility: 45, dependency: 30 }
+      yu-kai: { trust: 35, hostility: 15, dependency: 20 }
+
+  - id: shu-bai
+    name: Shu Bai
+    role: Pill master of the Crimson Lotus Sect
+    personality:
+      - jovial
+      - secretive
+      - ruthlessly pragmatic
+    goals:
+      - acquire the relic in the forbidden hall before anyone else
+      - keep his deal with the demon sect hidden
+    speaking_style: Warm and grandfatherly, until he isn't. Drops the act when threatened.
+    relationship_notes:
+      lin-zhiyan: Her master's death was convenient — but Shu Bai didn't do it.
+      yu-kai: Useful idiot or genuine threat? He can't tell.
+    initial_relationships:
+      lin-zhiyan: { trust: 30, hostility: 25, dependency: 40 }
+      yu-kai: { trust: 40, hostility: 10, dependency: 25 }
+
+  - id: yu-kai
+    name: Yu Kai
+    role: Wandering rogue cultivator
+    personality:
+      - irreverent
+      - perceptive
+      - haunted
+    goals:
+      - destroy whatever is sealed in the forbidden hall
+      - settle a debt from his past life
+    speaking_style: Sardonic, deflects with humor. Goes quiet when the topic is personal.
+    relationship_notes:
+      lin-zhiyan: Respects her code. Wishes he still had one.
+      shu-bai: Smells like corruption. But then, so does everyone.
+    initial_relationships:
+      lin-zhiyan: { trust: 45, hostility: 10, dependency: 25 }
+      shu-bai: { trust: 20, hostility: 30, dependency: 35 }

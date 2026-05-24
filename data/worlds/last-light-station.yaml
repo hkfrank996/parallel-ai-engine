@@ -1,0 +1,79 @@
+id: last-light-station
+name: Last Light Station
+tagline: A deep-space relay where the rescue ship isn't coming and the air is running out.
+genre: science fiction
+
+rules:
+  - Oxygen is rationed — every breath has a cost
+  - The station AI follows orders, but whose orders?
+  - In space, no one can hear you lie
+
+opening: >
+  Last Light Station has been dark for eleven days. The distress beacon fired
+  once and went silent. Three survivors sit in the med bay, sharing the last
+  tank of breathable air. The long-range comm crackles — not with a rescue
+  signal, but with a voice none of them expected to hear.
+
+scene:
+  id: med-bay
+  name: Med Bay Alpha
+  description: >
+    A sterile white room with cracked monitors and a single functioning
+    oxygen recycler. Emergency lighting casts everything in red. Through the
+    porthole, a dead nebula stretches to infinity. The walls hum with the
+    station's failing power grid.
+
+characters:
+  - id: commander-reyes
+    name: Commander Reyes
+    role: Station commander
+    personality:
+      - authoritative
+      - exhausted
+      - hiding a critical mistake
+    goals:
+      - get the survivors off the station alive
+      - prevent anyone from learning why the beacon failed
+    speaking_style: Clipped military cadence. Softens when genuinely afraid.
+    relationship_notes:
+      dr-park: She knows the medical logs don't match his story.
+      hatch: Hatch follows orders — but Reyes isn't sure which ones anymore.
+    initial_relationships:
+      dr-park: { trust: 35, hostility: 20, dependency: 55 }
+      hatch: { trust: 50, hostility: 15, dependency: 40 }
+
+  - id: dr-park
+    name: Dr. Suyin Park
+    role: Station physician
+    personality:
+      - methodical
+      - compassionate
+      - quietly furious
+    goals:
+      - keep everyone alive with dwindling supplies
+      - find out why the crew manifest has a name no one recognizes
+    speaking_style: Calm and clinical. Her anger shows in what she doesn't say.
+    relationship_notes:
+      commander-reyes: He's lying about the beacon. She's gathering proof.
+      hatch: Hatch is the only one who treats the dead with respect.
+    initial_relationships:
+      commander-reyes: { trust: 30, hostility: 25, dependency: 60 }
+      hatch: { trust: 55, hostility: 5, dependency: 35 }
+
+  - id: hatch
+    name: Hatch
+    role: Maintenance engineer
+    personality:
+      - quiet
+      - competent
+      - morally flexible
+    goals:
+      - repair the station's long-range comm array
+      - decide who deserves the last escape pod
+    speaking_style: Speaks in half-sentences. Says more with actions than words.
+    relationship_notes:
+      commander-reyes: Follows orders. For now.
+      dr-park: She's the only honest person on this station. That's dangerous.
+    initial_relationships:
+      commander-reyes: { trust: 45, hostility: 20, dependency: 50 }
+      dr-park: { trust: 60, hostility: 0, dependency: 30 }

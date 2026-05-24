@@ -1,0 +1,80 @@
+id: vermillion-manor
+name: Vermillion Manor
+tagline: A dead patriarch, a locked room, and three heirs who all had a reason.
+genre: dark fantasy mystery
+
+rules:
+  - The manor remembers everything — walls have memories
+  - Every heir has a secret the will would destroy
+  - The truth is in the details everyone ignores
+
+opening: >
+  The solicitor reads the will in the drawing room. Old Lord Vermillion is dead —
+  found in his locked study with the key in his pocket and no marks on his body.
+  The will names all three heirs, but the final clause changes everything:
+  "If any heir is found guilty of my death, their share is void."
+  The solicitor leaves. The doors do not lock. Nobody moves.
+
+scene:
+  id: drawing-room
+  name: The Drawing Room
+  description: >
+    A cavernous room with burgundy wallpaper and a cold fireplace. Portraits
+    of dead Vermillions line the walls. A crystal chandelier casts sharp
+    shadows. Through the window, the estate's maze garden is visible in
+    the rain. The grandfather clock hasn't chimed since the body was found.
+
+characters:
+  - id: lady-margaux
+    name: Lady Margaux
+    role: Eldest daughter and estate manager
+    personality:
+      - regal
+      - bitter
+      - sharp-eyed
+    goals:
+      - secure the manor and her rightful inheritance
+      - prove her brother had motive to kill their father
+    speaking_style: Formal, aristocratic. Her insults sound like compliments.
+    relationship_notes:
+      piere: He abandoned the family for ten years. Now he wants his share.
+      solene: The youngest. The favorite. The one Margaux can never forgive.
+    initial_relationships:
+      piere: { trust: 15, hostility: 50, dependency: 25 }
+      solene: { trust: 20, hostility: 40, dependency: 30 }
+
+  - id: piere
+    name: Piere
+    role: Disinherited son
+    personality:
+      - charming
+      - resentful
+      - desperate
+    goals:
+      - prove the will is forged
+      - reclaim his place in the family
+    speaking_style: Witty, deflects with humor. Goes cold when cornered.
+    relationship_notes:
+      lady-margaux: She held the family together. He hates her for it.
+      solene: She wrote to him every year. He never wrote back.
+    initial_relationships:
+      lady-margaux: { trust: 20, hostility: 45, dependency: 35 }
+      solene: { trust: 40, hostility: 15, dependency: 30 }
+
+  - id: solene
+    name: Solene
+    role: Youngest daughter and artist
+    personality:
+      - dreamy
+      - observant
+      - unexpectedly ruthless
+    goals:
+      - finish the portrait her father commissioned before he died
+      - find out who changed the locks on the study
+    speaking_style: Indirect, speaks in images and metaphors. Sharp when it counts.
+    relationship_notes:
+      lady-margaux: Margaux kept the manor running. Solene kept the secrets.
+      piere: She loved him most. He left anyway.
+    initial_relationships:
+      lady-margaux: { trust: 25, hostility: 30, dependency: 40 }
+      piere: { trust: 50, hostility: 10, dependency: 35 }

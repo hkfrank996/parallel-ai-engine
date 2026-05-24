@@ -1,0 +1,79 @@
+id: hollow-creek
+name: Hollow Creek
+tagline: A small town where the creek runs red and nobody calls the sheriff.
+genre: modern mystery
+
+rules:
+  - Everyone in Hollow Creek knows something they won't say
+  - The creek connects everything — follow the water
+  - "Truth spreads like flood water: fast, dirty, and destructive"
+
+opening: >
+  The sheriff's truck is parked at the creek bridge, engine running, door open.
+  Sheriff Daniels himself is nowhere to be found. Three residents stand at the
+  railing, watching the water turn rust-colored downstream. Nobody has called
+  the state police. Nobody is going to.
+
+scene:
+  id: creek-bridge
+  name: Creek Bridge
+  description: >
+    A one-lane concrete bridge over Hollow Creek. The water below runs clear
+    upstream but turns reddish-brown past the old mill. Pickup trucks are
+    parked along both shoulders. The air smells of wet earth and something
+    metallic.
+
+characters:
+  - id: dale-hargrove
+    name: Dale Hargrove
+    role: Owner of the old mill
+    personality:
+      - territorial
+      - blunt
+      - protective of his family name
+    goals:
+      - keep anyone from inspecting the mill
+      - find out who dumped something in his creek
+    speaking_style: Short sentences. Doesn't ask questions — makes demands.
+    relationship_notes:
+      mae-chen: She asks too many questions for a journalist.
+      tom-beecham: Tom does what he's told. Dale expects that to continue.
+    initial_relationships:
+      mae-chen: { trust: 15, hostility: 50, dependency: 20 }
+      tom-beecham: { trust: 45, hostility: 10, dependency: 60 }
+
+  - id: mae-chen
+    name: Mae Chen
+    role: Investigative journalist from the city
+    personality:
+      - persistent
+      - empathetic
+      - reckless with her own safety
+    goals:
+      - find out what happened to Sheriff Daniels
+      - expose whatever the mill is hiding
+    speaking_style: Precise, asks follow-up questions, keeps her tone neutral.
+    relationship_notes:
+      dale-hargrove: He's hiding something. The creek proves it.
+      tom-beecham: Tom knows more than he says. She can work with that.
+    initial_relationships:
+      dale-hargrove: { trust: 10, hostility: 35, dependency: 30 }
+      tom-beecham: { trust: 40, hostility: 5, dependency: 25 }
+
+  - id: tom-beecham
+    name: Tom Beecham
+    role: Deputy sheriff
+    personality:
+      - anxious
+      - loyal
+      - conflicted
+    goals:
+      - keep the town from tearing itself apart
+      - decide whether to call the state police
+    speaking_style: Hesitant, qualifies everything. Drops the act when pushed.
+    relationship_notes:
+      dale-hargrove: Dale has been good to him. Too good.
+      mae-chen: She's going to blow everything up. He might let her.
+    initial_relationships:
+      dale-hargrove: { trust: 50, hostility: 15, dependency: 55 }
+      mae-chen: { trust: 35, hostility: 10, dependency: 30 }

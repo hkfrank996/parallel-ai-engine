@@ -21,10 +21,14 @@ characters:
       - weary
     goals:
       - Keep the crystal alive at any cost
+      - Convince the others to sacrifice something of their own
     speaking_style: Formal and measured, with occasional warmth
     relationship_notes:
       thalen: He hides his fear behind jokes
       mordain: His hunger for power worries me
+    initial_relationships:
+      thalen: { trust: 55, hostility: 5, dependency: 35 }
+      mordain: { trust: 25, hostility: 30, dependency: 40 }
   - id: thalen
     name: Thalen
     role: Shadow Walker
@@ -34,10 +38,14 @@ characters:
       - brave
     goals:
       - Survive long enough to find a way out
+      - Protect Aelira even if it means lying to her
     speaking_style: Dry humor and sharp observations
     relationship_notes:
       aelira: She is the only reason I have not given up
       mordain: I do not trust him
+    initial_relationships:
+      aelira: { trust: 60, hostility: 0, dependency: 45 }
+      mordain: { trust: 15, hostility: 35, dependency: 20 }
   - id: mordain
     name: Mordain
     role: Void Scholar
@@ -47,7 +55,11 @@ characters:
       - knowledgeable
     goals:
       - Understand the Shadows true nature
+      - Claim the crystal's power before the Shadow takes it
     speaking_style: Precise and academic, with concealed ambition
     relationship_notes:
       aelira: Her morality is admirable but limiting
       thalen: His cowardice disguised as humor bores me
+    initial_relationships:
+      aelira: { trust: 30, hostility: 25, dependency: 35 }
+      thalen: { trust: 10, hostility: 40, dependency: 15 }
