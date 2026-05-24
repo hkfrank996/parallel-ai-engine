@@ -14,10 +14,10 @@ interface Props {
 }
 
 const TIME_LABELS: Record<string, { zh: string; en: string }> = {
-  dawn: { zh: "榛庢槑", en: "Dawn" },
-  morning: { zh: "涓婂崍", en: "Morning" },
-  afternoon: { zh: "涓嬪崍", en: "Afternoon" },
-  night: { zh: "澶滄櫄", en: "Night" },
+  dawn: { zh: "黎明", en: "Dawn" },
+  morning: { zh: "上午", en: "Morning" },
+  afternoon: { zh: "下午", en: "Afternoon" },
+  night: { zh: "夜晚", en: "Night" },
 };
 
 function calcTension(relationships: Relationship[], worldEvents: WorldEvent[], turnCount: number) {
