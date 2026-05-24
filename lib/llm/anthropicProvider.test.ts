@@ -4,7 +4,7 @@ import { AnthropicProvider } from "./anthropicProvider";
 /**
  * Unit tests for AnthropicProvider response parsing.
  * Tests content block handling for both native Anthropic and
- * DeepSeek Anthropic-compatible endpoints.
+ * extended content format endpoints (e.g. thinking blocks).
  */
 
 function makeFakeResponse(body: unknown, ok = true): Response {
@@ -33,8 +33,8 @@ describe("AnthropicProvider.generate", () => {
     expect(text).toBe("Hello world");
   });
 
-  it("skips thinking block and returns first text block (DeepSeek / extended)", async () => {
-    const p = new AnthropicProvider("key", "https://api.deepseek.com/anthropic", "deepseek-v4-flash");
+  it("skips thinking block and returns first text block (extended content format)", async () => {
+    const p = new AnthropicProvider("key", "https://example-anthropic-compatible.test/anthropic", "extended-model-v1");
     const text = await callGenerate(p, {
       content: [
         { type: "thinking", thinking: "Let me respond with a greeting." },
@@ -45,7 +45,7 @@ describe("AnthropicProvider.generate", () => {
   });
 
   it("returns first text block even when text is not the last block", async () => {
-    const p = new AnthropicProvider("key", "https://api.deepseek.com/anthropic", "deepseek-v4-flash");
+    const p = new AnthropicProvider("key", "https://example-anthropic-compatible.test/anthropic", "extended-model-v1");
     const text = await callGenerate(p, {
       content: [
         { type: "text", text: "First text block" },
@@ -84,7 +84,7 @@ describe("AnthropicProvider.generate", () => {
 
   it("uses Bearer auth for non-anthropic.com base URLs", async () => {
     let capturedHeaders: Record<string, string> = {};
-    const p = new AnthropicProvider("secret-key", "https://api.deepseek.com/anthropic", "model");
+    const p = new AnthropicProvider("secret-key", "https://example-anthropic-compatible.test/anthropic", "model");
     global.fetch = async (_url, init) => {
       capturedHeaders = init?.headers as Record<string, string>;
       return makeFakeResponse({ content: [{ type: "text", text: "ok" }] }) as Response;
