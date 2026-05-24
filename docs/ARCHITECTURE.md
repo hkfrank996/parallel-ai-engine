@@ -1,4 +1,4 @@
-# Architecture — Parallel v0.6
+# Architecture — Parallel
 
 ## Directory Structure
 
@@ -39,7 +39,8 @@ parallel/
 │   │   ├── provider.ts         # Provider resolution logic
 │   │   ├── openaiProvider.ts   # OpenAI-compatible implementation
 │   │   ├── anthropicProvider.ts# Anthropic implementation
-│   │   └── mockProvider.ts     # Mock implementation
+│   │   ├── mockProvider.ts     # Mock implementation
+│   │   └── validateUrl.ts      # SSRF protection + error sanitization
 │   ├── extensions/             # Extension point definitions
 │   │   ├── types.ts            # Extension interfaces
 │   │   └── registry.ts         # Extension registration
@@ -52,7 +53,12 @@ parallel/
 ├── .github/workflows/ci.yml
 └── docs/
     ├── ARCHITECTURE.md         # ← this file
-    └── API.md                  # API reference
+    ├── API.md                  # API reference
+    ├── CONFIG.md               # LLM provider configuration
+    ├── WORLD_FORMAT.md         # World YAML schema reference
+    ├── ROADMAP.md              # Product roadmap (English)
+    ├── ROADMAP_ZH.md           # 产品路线图（中文）
+    └── RELEASE_CHECKLIST.md    # Phase 4 + v1.0 checklist
 ```
 
 ## Request Flow

@@ -1,10 +1,12 @@
 # Parallel — Product Roadmap
 
+> AI 剧本杀 / AI-driven murder mystery investigative roleplay
+
 > [中文版 / Chinese version](ROADMAP_ZH.md)
 
 > You walk into an AI-built world where everyone has their own will. You explore, talk, discover — and the world changes in real-time based on your every move.
 >
-> This is not a scripted game. This is a **living world**.
+> This is not a scripted game. This is a **living world** — an AI 剧本杀 where characters remember, betray, and evolve.
 >
 > **Supports any genre**: cyberpunk mystery, dark fantasy, sci-fi conspiracy, modern urban — whatever you create, Parallel runs it.
 
@@ -23,7 +25,7 @@ Parallel = **AI Director** + **Dynamic Characters** + **Mutable Truth**. Every p
 
 The director doesn't simply "pick who speaks." It is the world's creator:
 
-1. **Has a main plot, but doesn't cling to it** — the director has a storyline in mind, but is随时 ready to abandon it
+1. **Has a main plot, but doesn't cling to it** — the director has a storyline in mind, but is always ready to abandon it
 2. **Creates tension** — when the plot is too smooth, the director creates surprises; when too chaotic, the director reins it in
 3. **Characters have their own will** — the director lets characters act in their own interest, not "what the script needs"
 4. **The world runs on its own** — even if the user does nothing, the world keeps changing
@@ -50,7 +52,11 @@ Playable → Memorable → Mutable → Buildable → Shareable → Release
 | v0.4 | World Workshop | Create your own world | Build a world without writing code | ✅ |
 | v0.5 | Polish | Player identity + clues + investigation + genre-agnostic engine | From "chat" to "investigation," engine adapts to any genre | ✅ |
 | v0.6 | Extensible | Docker, CI, multi-model, extension layer | A new developer runs it in 10 minutes | ✅ |
-| v1.0 | Release | Polished public release with demo worlds | Complete docs, online demo, contributor guide | ⬜ |
+| v1.0-P1 | Stable Layer | Security hardening, test suite, import safety | SSRF protection, error sanitization, 47 tests | ✅ |
+| v1.0-P2 | Showcase Worlds | 9 demo worlds spanning 4 genres | Instant product demonstration | ✅ |
+| v1.0-P3 | Release Docs | README, docs/, package review | Handoff-ready documentation | ✅ |
+| v1.0-P4 | Pre-release QA | Polish, harden, accessibility | Production-quality validation | ⬜ |
+| v1.0 | Release | Polished public release | Complete docs, demo deployment, v1.0 tag | ⬜ |
 
 ---
 
@@ -116,7 +122,7 @@ Layer 3: Narrative (v0.3 foundation, enhanced later)
 
 **1. World Time Progression** ✅
 - Day counter + time periods (dawn/morning/afternoon/night)
-- Advance one period every 4 dialogue turns
+- Advance one period every 8 dialogue turns
 - Time affects scene atmosphere (night = "Neon flickers in the rain")
 - Character availability affected by time
 
@@ -296,21 +302,99 @@ Character.AI is chat. SillyTavern is roleplay. Parallel is a **living world simu
 
 ---
 
-## v1.0 — Public Release ⬜
+## v1.0 Phase 1 — Stable Layer ✅
 
-**Goal:** A polished, well-documented open-source release that anyone can understand in 2 minutes.
+**Goal:** Stabilize the v0.6 codebase as a maintainable v1.0 baseline. No new features.
 
-### Scope
-- 3-5 complete demo worlds
-- Online demo or HD recording
-- Full docs site + architecture diagrams + data flow diagrams
-- "How it works" technical article
-- Roadmap / Issues / Contributing / Changelog
+### Implemented
+
+- SSRF protection — blocks private IPv4/IPv6, cloud metadata, localhost
+- Error sanitization — strips URLs, API keys (sk-/tp-/key-/token-/api-), tokens from error messages
+- YAML safety — `CORE_SCHEMA` prevents `!!js/function` code execution
+- Import safety — validates session data before writing YAML; no dirty files on failure
+- Store deduplication — re-importing clears old data before writing
+- Test suite — 47 vitest tests (SSRF, sanitizeError, import dedup, import safety)
 
 ### Acceptance Criteria
-- A visitor understands in 2 minutes: this is not a chatbot, it is a living narrative world
-- A developer runs it locally in 10 minutes
-- A player feels "this world remembers me" within 5 minutes
+- [x] `npm run test` passes (47 tests)
+- [x] `npm run lint` passes
+- [x] `npm run build` passes
+- [x] No real API keys in committed files
+- [x] `.env.local`, `store.json`, `CODEX_HANDOFF.md` gitignored
+
+---
+
+## v1.0 Phase 2 — Showcase Worlds ✅
+
+**Goal:** 9 high-quality demo worlds so users can see the product's range immediately.
+
+### Worlds
+
+| World | Genre | Hook |
+|-------|-------|------|
+| Neon Harbor | Cyberpunk mystery | A rainy night market, a missing courier, three people with secrets |
+| Crimson Keep | Dark fantasy | A dead advisor, a prophecy, three suspects before dawn |
+| Orbital Station Sigma | Sci-fi conspiracy | Air running out, captain dead, station AI always listening |
+| Shadow Realm | Dark fantasy | A dying crystal, three mages, the Shadow closing in |
+| Jade Sect Summons | Xianxia dark fantasy | Three cultivators answer a forbidden summons beneath a jade mountain |
+| Hollow Creek | Modern mystery | A small town where the creek runs red and nobody calls the sheriff |
+| Last Light Station | Sci-fi survival | A deep-space relay, dwindling oxygen, a voice on the comm |
+| Glass Tower | Cyberpunk mystery | CEO vanished, every floor has a secret, lockdown initiated |
+| Vermillion Manor | Dark fantasy mystery | A dead patriarch, a locked room, three heirs with motive |
+
+### Acceptance Criteria
+- [x] 9 worlds across 4 CSS themes (cyan/purple/blue/gold)
+- [x] Each world: 3 characters, 2+ goals each, complete relationship matrix
+- [x] All worlds load via API (HTTP 200)
+- [x] No secrets, PII, or YAML injection in any file
+
+---
+
+## v1.0 Phase 3 — Release Docs & Package ✅
+
+**Goal:** Make the project publishable, handoff-ready, and runnable by a new user.
+
+### Implemented
+- README refresh (bilingual, showcase world list, security notes)
+- `docs/` directory: CONFIG, WORLD_FORMAT, ARCHITECTURE, API, ROADMAP, RELEASE_CHECKLIST
+- package.json review (scripts, metadata)
+
+### Acceptance Criteria
+- [x] README.md lists all 9 showcase worlds
+- [x] README.md has import/export, security, and testing sections
+- [x] README_ZH.md mirrors English version
+- [x] All internal doc links resolve
+- [x] No real API keys in any documentation file
+- [x] `npm run test` passes (47 tests)
+- [x] `npm run lint` passes
+- [x] `npm run build` passes
+
+---
+
+## v1.0 Phase 4 — Pre-release QA ⬜
+
+**Goal:** Production-quality hardening without changing core features.
+
+### Scope
+- Race condition mitigation for `store.ts` (concurrent write safety)
+- API authentication (optional, for multi-user deployments)
+- Performance profiling for large sessions (1000+ messages)
+- Accessibility audit (ARIA, keyboard navigation, screen reader)
+- Mobile responsive polish
+- Error boundary components
+- Docker Compose for one-command deployment
+
+---
+
+## v1.0 — Closeout ⬜
+
+**Goal:** Tag, release, and ship.
+
+### Scope
+- Version bump to `1.0.0` in `package.json`
+- GitHub Release with tag `v1.0.0` and changelog
+- Demo deployment (Vercel or Docker)
+- Community world template submission guide
 
 ---
 

@@ -1,10 +1,12 @@
-# Parallel — AI叙事世界引擎
+# Parallel — AI 剧本杀世界引擎
+
+> AI 剧本杀 / AI-driven murder mystery investigative roleplay
 
 > [English version / 英文版](ROADMAP.md)
 
 > **一句话定义：** 你走进一个 AI 构建的世界，里面每个人都有自己的意志。你探索、对话、发现——而这个世界会根据你的一举一动，实时改变走向。
 >
-> 这不是固定剧本的游戏。这是**一个活的世界**。
+> 这不是固定剧本的游戏。这是一个**活的 AI 剧本杀世界**——角色会记住你、会背叛你、会因为你而改变。
 >
 > **支持任何类型的世界**：赛博朋克悬疑、暗黑奇幻、科幻阴谋、现代都市……你创建什么，Parallel 就运行什么。
 
@@ -50,7 +52,11 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 | v0.4 | 剧本工坊 | 创建自己的世界 | 不写代码也能造一个世界 | ✅ |
 | v0.5 | 产品优化 | 玩家身份+线索+调查+通用引擎 | 从"聊天"变成"调查"，引擎适配任何类型 | ✅ |
 | v0.6 | 可扩展 | Docker、CI、多模型、扩展层 | 陌生开发者 10 分钟跑起来 | ✅ |
-| v1.0 | Release | Polished public release with demo worlds | Complete docs, online demo, contributor guide | ⬜ |
+| v1.0-P1 | 稳定层 | 安全加固、测试套件、导入安全 | SSRF 防护、错误脱敏、47 个测试 | ✅ |
+| v1.0-P2 | 展示世界 | 9 个演示世界覆盖 4 种类型 | 即时展示产品能力 | ✅ |
+| v1.0-P3 | 发布文档 | README、docs/、package 审查 | 可交接的文档 | ✅ |
+| v1.0-P4 | 发布前 QA | 打磨、加固、无障碍 | 生产级质量验证 | ⬜ |
+| v1.0 | Release | 打磨后的公开发布 | 完整文档、demo 部署、v1.0 tag | ⬜ |
 
 ---
 
@@ -116,7 +122,7 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 
 **1. 世界时间推进** ✅
 - day counter + 时间段（黎明/上午/下午/夜晚）
-- 每 4 轮对话推进一个时段
+- 每 8 轮对话推进一个时段
 - 时间影响场景氛围（night = "Neon flickers in the rain"）
 - 角色可用性受时间影响
 
@@ -182,11 +188,11 @@ Parallel = **AI 总导演** + **动态角色** + **可变真相**。玩家的每
 - 关系随对话演变（出钱 → Ren 信任上升，June 敌意上升）
 - Director 场景更新有洞察力（"附近摊贩的交谈声短暂压低"）
 - 记忆提取准确（conflict/impression/affinity/event/reflection）
-- 当前默认模型为 `mimo-v2.5`；旧测试中 `mimo-v2.5-pro` 路径每轮约 70-90 秒（5-7 次 LLM 调用）
+- 历史测试曾使用 MiMo 系列模型；其中 `mimo-v2.5-pro` 路径每轮约 70-90 秒（5-7 次 LLM 调用）
 - 后处理已并行化（记忆提取+关系分析+事件生成 Promise.all）
 - 角色生成保持串行（后面角色能看到前面角色的发言）
 - 记忆窗口放大：30 条近期消息 + 5 条世界事实 + 10 条角色记忆（利用 1M token 上下文）
-- API 已从 `gpt-5.5` 迁移到 MiMo 系列；当前默认是 `mimo-v2.5`，历史上曾使用 `mimo-v2.5-pro`
+- 历史上曾使用 MiMo 系列模型（含 `mimo-v2.5-pro`）；当前公开示例默认使用 OpenAI 官方 `gpt-4o-mini`，MiMo 可作为自定义 OpenAI-compatible endpoint 配置
 
 ### 已知问题（待修复）
 
@@ -348,21 +354,99 @@ Character.AI is chat. SillyTavern is roleplay. Parallel is a **living world simu
 
 ---
 
-## v1.0 — Public Release ⬜
+## v1.0 Phase 1 — 稳定层 ✅
 
-**Goal:** A polished, well-documented open-source release that anyone can understand in 2 minutes.
+**目标：** 把 v0.6 代码库稳定为可维护的 v1.0 基线。不加新功能。
 
-### Scope
-- 3-5 complete demo worlds
-- Online demo or HD recording
-- Full docs site + architecture diagrams + data flow diagrams
-- "How it works" technical article
-- Roadmap / Issues / Contributing / Changelog
+### 已实现
 
-### Acceptance Criteria
-- A visitor understands in 2 minutes: this is not a chatbot, it is a living narrative world
-- A developer runs it locally in 10 minutes
-- A player feels "this world remembers me" within 5 minutes
+- SSRF 防护 — 拦截私有 IPv4/IPv6、云元数据、localhost
+- 错误脱敏 — 从错误消息中剥离 URL、API key（sk-/tp-/key-/token-/api-）、token
+- YAML 安全 — `CORE_SCHEMA` 阻止 `!!js/function` 代码执行
+- 导入安全 — 先校验 sessionData 再写 YAML；失败不留脏文件
+- 存储去重 — 重新导入时先清旧数据再写入
+- 测试套件 — 47 个 vitest 测试（SSRF、sanitizeError、导入去重、导入安全）
+
+### 验收标准
+- [x] `npm run test` 通过（47 个测试）
+- [x] `npm run lint` 通过
+- [x] `npm run build` 通过
+- [x] 提交文件中无真实 API key
+- [x] `.env.local`、`store.json`、`CODEX_HANDOFF.md` 已加入 .gitignore
+
+---
+
+## v1.0 Phase 2 — 展示世界 ✅
+
+**目标：** 9 个高质量演示世界，让用户立即看到产品的广度。
+
+### 世界列表
+
+| 世界 | 类型 | 一句话介绍 |
+|------|------|-----------|
+| Neon Harbor | 赛博朋克悬疑 | 雨夜市场，失踪的快递员，三个各怀秘密的人 |
+| Crimson Keep | 暗黑奇幻 | 死去的顾问，预言，黎明前的三个嫌疑人 |
+| Orbital Station Sigma | 科幻阴谋 | 空气告急，船长已死，空间站 AI 时刻在听 |
+| Shadow Realm | 暗黑奇幻 | 濒死的水晶，三个法师，逼近的暗影 |
+| Jade Sect Summons | 仙侠暗黑奇幻 | 三个修士应召而来，玉山之下禁制将破 |
+| Hollow Creek | 现代悬疑 | 小镇溪水泛红，没人报警，没人离开 |
+| Last Light Station | 科幻生存 | 深空中继站，氧气将尽，通讯里传来不该出现的声音 |
+| Glass Tower | 赛博朋克悬疑 | CEO 失踪，每层楼都有秘密，封锁已启动 |
+| Vermillion Manor | 暗黑奇幻悬疑 | 死去的族长，上锁的房间，三个有动机的继承人 |
+
+### 验收标准
+- [x] 9 个世界覆盖 4 种 CSS 主题（cyan/purple/blue/gold）
+- [x] 每个世界：3 角色、每人 2+ 目标、完整关系矩阵
+- [x] 所有世界 API 加载正常（HTTP 200）
+- [x] 无密钥、PII、YAML 注入
+
+---
+
+## v1.0 Phase 3 — 发布文档 ✅
+
+**目标：** 让项目可发布、可交接、可让新用户跑起来。
+
+### 已实现
+- README 刷新（双语、展示世界列表、安全说明）
+- `docs/` 目录：CONFIG、WORLD_FORMAT、ARCHITECTURE、API、ROADMAP、RELEASE_CHECKLIST
+- package.json 审查
+
+### 验收标准
+- [x] README.md 列出全部 9 个展示世界
+- [x] README.md 包含导入导出、安全、测试章节
+- [x] README_ZH.md 与英文版同步
+- [x] 所有内部文档链接可解析
+- [x] 文档中无真实 API key
+- [x] `npm run test` 通过（47 个测试）
+- [x] `npm run lint` 通过
+- [x] `npm run build` 通过
+
+---
+
+## v1.0 Phase 4 — 发布前 QA ⬜
+
+**目标：** 不改核心功能的生产级加固。
+
+### 范围
+- `store.ts` 竞态条件缓解
+- API 认证（可选，面向多用户部署）
+- 大会话性能分析（1000+ 消息）
+- 无障碍审计（ARIA、键盘导航、屏幕阅读器）
+- 移动端响应式打磨
+- Error boundary 组件
+- Docker Compose 一键部署
+
+---
+
+## v1.0 — 收口 ⬜
+
+**目标：** 打 tag、发 release、上线。
+
+### 范围
+- `package.json` 版本升至 `1.0.0`
+- GitHub Release tag `v1.0.0` + changelog
+- Demo 部署（Vercel 或 Docker）
+- 社区世界模板提交指南
 
 ---
 

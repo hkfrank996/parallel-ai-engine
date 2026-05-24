@@ -1,4 +1,4 @@
-# API Reference — Parallel v0.6
+# API Reference — Parallel
 
 Base URL: `http://localhost:3000`
 
@@ -249,7 +249,7 @@ Test an LLM provider connection.
   "llmConfig": {
     "providerType": "openai",
     "apiUrl": "https://api.openai.com/v1",
-    "apiKey": "sk-...",
+    "apiKey": "your_openai_api_key_here",
     "model": "gpt-4o-mini"
   }
 }
@@ -303,8 +303,8 @@ Send a message and receive the world's response.
   "llmConfig": {
     "providerType": "openai",
     "apiUrl": "https://api.openai.com/v1",
-    "apiKey": "sk-...",
-    "model": "mimo-v2.5"
+    "apiKey": "your_openai_api_key_here",
+    "model": "gpt-4o-mini"
   }
 }
 ```

@@ -80,20 +80,27 @@ Double-click `start.bat`, then open `http://localhost:3000`.
 Copy `.env.local.example` to `.env.local` and configure a provider:
 
 ```env
+# OpenAI (official)
 LLM_PROVIDER=openai
-
-OPENAI_API_KEY=sk-...
+OPENAI_API_KEY=your_openai_api_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=mimo-v2.5
+OPENAI_MODEL=gpt-4o-mini
 
-# Or use another provider:
+# OpenRouter
 # LLM_PROVIDER=openrouter
-# OPENROUTER_API_KEY=sk-or-...
+# OPENROUTER_API_KEY=your_openrouter_api_key_here
 # OPENROUTER_MODEL=openai/gpt-4o-mini
 
+# Ollama (local, no key needed)
 # LLM_PROVIDER=ollama
 # OLLAMA_BASE_URL=http://localhost:11434/v1
 # OLLAMA_MODEL=llama3
+
+# Custom OpenAI-compatible endpoint (e.g. self-hosted or third-party)
+# LLM_PROVIDER=openai
+# OPENAI_API_KEY=your_custom_api_key_here
+# OPENAI_BASE_URL=https://your-custom-endpoint.example.com/v1
+# OPENAI_MODEL=your-model-name
 ```
 
 ### Provider Support Matrix
@@ -108,20 +115,79 @@ OPENAI_MODEL=mimo-v2.5
 
 > Parallel enters Mock Mode **only** when no provider is configured. An OpenAI-compatible provider with an empty key sends requests without an Authorization header — this is not Mock Mode.
 
+## Showcase Worlds
+
+9 demo worlds spanning 4 genres — open the app and pick one:
+
+| World | Genre | Tagline |
+|-------|-------|---------|
+| **Neon Harbor** | Cyberpunk mystery | A rainy cyberpunk port where everyone owes someone something |
+| **Crimson Keep** | Dark fantasy | An ancient castle where the king's advisor is dead and the prophecy demands justice before dawn |
+| **Orbital Station Sigma** | Sci-fi conspiracy | A deep-space station where the air is running out and someone just killed the captain |
+| **Shadow Realm** | Dark fantasy | A dying magical realm where three mages hold the last light |
+| **Jade Sect Summons** | Xianxia dark fantasy | Three cultivators answer a forbidden summons beneath a jade mountain |
+| **Hollow Creek** | Modern mystery | A small town where the creek runs red and nobody calls the sheriff |
+| **Last Light Station** | Sci-fi survival | A deep-space relay where the rescue ship isn't coming and the air is running out |
+| **Glass Tower** | Cyberpunk mystery | A corporate skyscraper where the CEO vanished and every floor has a secret |
+| **Vermillion Manor** | Dark fantasy mystery | A dead patriarch, a locked room, and three heirs who all had a reason |
+
+Each world: 3 characters with distinct personalities, relationship webs, secrets, and goals.
+
+## Testing
+
+```bash
+npm run test     # 47 vitest tests (SSRF, error sanitization, import safety)
+npm run lint     # TypeScript type check
+npm run build    # Production build
+```
+
+## Import / Export
+
+Export a world and its session data:
+
+```bash
+curl "http://localhost:3000/api/world/export?worldId=neon-harbor"
+# Returns: { worldId, yaml, sessionData }
+```
+
+Import a world from YAML:
+
+```bash
+curl -X POST http://localhost:3000/api/world/import \
+  -H "Content-Type: application/json" \
+  -d '{"yaml": "id: my-world\nname: My World\n..."}'
+```
+
+Constraints: max 500 KB YAML, max 10,000 session entries. Import validates before writing — no dirty files on failure.
+
+## Security
+
+- `.env.local` — gitignored, never commit API keys
+- `data/store.json` — gitignored, runtime session data
+- `CODEX_HANDOFF.md` — gitignored, private handoff notes
+- SSRF protection blocks private IPs, cloud metadata, localhost
+- Error messages are sanitized (URLs and API keys stripped)
+- YAML parsing uses `CORE_SCHEMA` (no code execution)
+
 ## Documentation
 
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Directory structure, request flow, provider system, extension layer
 - **[docs/API.md](docs/API.md)** — API endpoint reference
+- **[docs/CONFIG.md](docs/CONFIG.md)** — LLM provider configuration guide
+- **[docs/WORLD_FORMAT.md](docs/WORLD_FORMAT.md)** — World YAML schema, field reference, common pitfalls
 - **[docs/ROADMAP.md](docs/ROADMAP.md)** — Product roadmap
 - **[docs/ROADMAP_ZH.md](docs/ROADMAP_ZH.md)** — 产品路线图（中文）
+- **[docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)** — Phase 4 + v1.0 release checklist
 
 ## Current Status
 
-**v0.6 — Foundation Build**
+**Pre-v1.0 — Phase 1 + Phase 2 + Phase 3 completed, Phase 4 pending**
 
-This release adds infrastructure and extensibility: Docker support, GitHub Actions CI, extensible provider registry (5 providers), extension point interfaces, and architecture/API documentation. All product features from v0.5 are fully operational.
-
-Default model: **mimo-v2.5** (OpenAI-compatible).
+- Phase 1 (Stable Layer): SSRF protection, error sanitization, test suite ✅
+- Phase 2 (Showcase Worlds): 9 demo worlds across 4 genres ✅
+- Phase 3 (Release Docs): README, docs/, package review ✅
+- Phase 4 (Pre-release QA): Pending
+- v1.0 Closeout: Pending
 
 ## License
 
