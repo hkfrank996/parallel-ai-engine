@@ -155,7 +155,8 @@ function read(): StoreData {
       relationshipHistory: data.relationshipHistory || [],
       clues: data.clues || [],
     };
-  } catch {
+  } catch (e) {
+    console.error("store.json is corrupted, backing up and resetting:", e);
     try {
       const backupFile = path.join(DATA_DIR, `store.recovered-${Date.now()}.json`);
       fs.copyFileSync(STORE_FILE, backupFile);

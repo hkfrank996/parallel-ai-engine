@@ -5,11 +5,13 @@ export class AnthropicProvider implements LLMProvider {
   private baseUrl: string;
   private model: string;
   private useBearer: boolean;
+  private timeoutMs: number;
 
   constructor(apiKey: string, baseUrl: string, model: string) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.model = model;
+    this.timeoutMs = Number(process.env.LLM_TIMEOUT_MS || 90000);
     const lower = baseUrl.toLowerCase();
     this.useBearer = !lower.includes("anthropic.com") && !lower.includes("bigmodel.cn");
   }
@@ -31,17 +33,31 @@ export class AnthropicProvider implements LLMProvider {
       headers["x-api-key"] = this.apiKey;
     }
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        model: this.model,
-        max_tokens: 800,
-        temperature: 0.8,
-        system: systemPrompt,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          model: this.model,
+          max_tokens: 800,
+          temperature: 0.8,
+          system: systemPrompt,
+          messages: [{ role: "user", content: userPrompt }],
+        }),
+        signal: controller.signal,
+      });
+    } catch (e) {
+      if ((e as Error).name === "AbortError") {
+        throw new Error(`Anthropic API timeout after ${this.timeoutMs}ms`);
+      }
+      throw e;
+    } finally {
+      clearTimeout(timeout);
+    }
 
     const body = await res.json();
 
