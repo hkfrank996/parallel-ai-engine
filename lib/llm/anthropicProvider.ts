@@ -70,7 +70,7 @@ export class AnthropicProvider implements LLMProvider {
       throw new Error(`API error: ${body.msg || body.message || "unknown error"}`);
     }
 
-    const text = body.content?.[0]?.text?.trim();
+    const text = body.content?.find((c: {type: string; text?: string}) => c.type === "text")?.text?.trim();
     if (!text) {
       throw new Error("Anthropic API returned an empty response");
     }
