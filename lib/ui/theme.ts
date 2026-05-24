@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { safeGetItem, safeSetItem } from "./safeStorage";
 
 export type UiTheme = "night" | "day";
 
@@ -15,7 +16,7 @@ function readDocumentTheme(): UiTheme | null {
 
 export function loadTheme(): UiTheme {
   if (typeof window !== "undefined") {
-    return localStorage.getItem(THEME_KEY) === "day" ? "day" : "night";
+    return safeGetItem(THEME_KEY) === "day" ? "day" : "night";
   }
   const documentTheme = readDocumentTheme();
   return documentTheme || "night";
@@ -30,7 +31,7 @@ export function applyTheme(theme: UiTheme) {
 
 export function saveTheme(theme: UiTheme) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(THEME_KEY, theme);
+  safeSetItem(THEME_KEY, theme);
   applyTheme(theme);
   window.dispatchEvent(new CustomEvent<UiTheme>(THEME_EVENT, { detail: theme }));
 }

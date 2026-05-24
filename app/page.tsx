@@ -10,6 +10,7 @@ import WorldPulse from "@/components/WorldPulse";
 import SettingsModal, { loadSettings } from "@/components/SettingsModal";
 import { T, type Lang } from "@/lib/i18n";
 import { useUiTheme } from "@/lib/ui/theme";
+import { safeGetItem, safeSetItem } from "@/lib/ui/safeStorage";
 import type { World } from "@/lib/world/types";
 import type { Message, SessionEvent, WorldFact, CharacterMemory, WorldTime, Relationship, WorldEvent, RelationshipHistory, Clue } from "@/lib/storage/store";
 
@@ -57,7 +58,7 @@ function getGenreClass(genre?: string): string {
 
 function loadLanguage(): Lang {
   if (typeof window === "undefined") return "zh";
-  return (localStorage.getItem(LANG_KEY) as Lang) || "zh";
+  return (safeGetItem(LANG_KEY) as Lang) || "zh";
 }
 
 function formatTimeOfDay(timeOfDay: string | undefined, lang: Lang): string {
@@ -124,15 +125,15 @@ export default function Home() {
 
   useEffect(() => {
     setLanguage(loadLanguage());
-    const savedName = localStorage.getItem(PLAYER_NAME_KEY) || "";
+    const savedName = safeGetItem(PLAYER_NAME_KEY) || "";
     setPlayerName(savedName);
-    setWorldPulseCollapsed(localStorage.getItem(WORLD_PULSE_COLLAPSED_KEY) === "1");
-    loadWorld(localStorage.getItem(ACTIVE_WORLD_KEY) || undefined);
+    setWorldPulseCollapsed(safeGetItem(WORLD_PULSE_COLLAPSED_KEY) === "1");
+    loadWorld(safeGetItem(ACTIVE_WORLD_KEY) || undefined);
     fetch("/api/world?action=list").then(r => r.json()).then(d => setWorldList(d.worlds || [])).catch(() => {});
   }, [loadWorld]);
 
   useEffect(() => {
-    localStorage.setItem(WORLD_PULSE_COLLAPSED_KEY, worldPulseCollapsed ? "1" : "0");
+    safeSetItem(WORLD_PULSE_COLLAPSED_KEY, worldPulseCollapsed ? "1" : "0");
   }, [worldPulseCollapsed]);
 
   const handleSend = async (message: string, _action?: string) => {
@@ -219,7 +220,7 @@ export default function Home() {
   const toggleLanguage = () => {
     const next: Lang = language === "zh" ? "en" : "zh";
     setLanguage(next);
-    localStorage.setItem(LANG_KEY, next);
+    safeSetItem(LANG_KEY, next);
   };
 
   const toggleTheme = () => {
@@ -230,11 +231,11 @@ export default function Home() {
     const trimmed = name.trim();
     if (!trimmed) return;
     setPlayerName(trimmed);
-    localStorage.setItem(PLAYER_NAME_KEY, trimmed);
+    safeSetItem(PLAYER_NAME_KEY, trimmed);
   };
 
   const switchWorld = (worldId: string) => {
-    localStorage.setItem(ACTIVE_WORLD_KEY, worldId);
+    safeSetItem(ACTIVE_WORLD_KEY, worldId);
     setLoading(true);
     loadWorld(worldId);
     setShowWorldPicker(false);

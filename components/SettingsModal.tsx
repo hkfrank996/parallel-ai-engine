@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { SETTINGS_PROVIDER_KEYS, getProviderMeta, type ProviderKey } from "@/lib/llm/catalog";
+import { safeGetItem, safeSetItem, safeRemoveItem } from "@/lib/ui/safeStorage";
 
 interface Props {
   open: boolean;
@@ -20,7 +21,7 @@ export interface LLMSettings {
 export function loadSettings(): LLMSettings | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeGetItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     // Migrate legacy "openai"|"anthropic" union to ProviderKey
@@ -33,7 +34,7 @@ export function loadSettings(): LLMSettings | null {
 
 export function clearSettings() {
   if (typeof window === "undefined") return;
-  localStorage.removeItem(STORAGE_KEY);
+  safeRemoveItem(STORAGE_KEY);
 }
 
 export default function SettingsModal({ open, onClose }: Props) {
@@ -74,7 +75,7 @@ export default function SettingsModal({ open, onClose }: Props) {
     const trimmedKey = apiKey.trim();
     // Always save — even without apiKey. The user may be configuring a
     // key-less provider (Ollama, local server) or planning to add a key later.
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    safeSetItem(STORAGE_KEY, JSON.stringify({
       providerType,
       apiUrl: apiUrl.trim(),
       apiKey: trimmedKey,
@@ -89,7 +90,7 @@ export default function SettingsModal({ open, onClose }: Props) {
   };
 
   const handleClear = () => {
-    localStorage.removeItem(STORAGE_KEY);
+    safeRemoveItem(STORAGE_KEY);
     setApiUrl("");
     setApiKey("");
     setModel("");

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { T, type Lang } from "@/lib/i18n";
 import { useUiTheme } from "@/lib/ui/theme";
+import { safeGetItem } from "@/lib/ui/safeStorage";
 
 interface CharacterForm {
   id: string; name: string; role: string; personality: string; goals: string; speaking_style: string; relationship_notes: string; secrets: string;
@@ -38,7 +39,7 @@ export default function CreateWorldPage() {
   const canSave = !!name.trim() && hasValidCharacter && !saving;
 
   useEffect(() => {
-    setLanguage(localStorage.getItem("parallel-language") === "en" ? "en" : "zh");
+    setLanguage(safeGetItem("parallel-language") === "en" ? "en" : "zh");
   }, []);
 
   const addCharacter = () => { if (characters.length < 6) setCharacters([...characters, { ...emptyCharacter }]); };
