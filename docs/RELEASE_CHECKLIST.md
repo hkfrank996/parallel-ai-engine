@@ -23,6 +23,7 @@
 - [ ] SSRF protection verified (private IPs, metadata, localhost blocked)
 - [ ] Error messages don't leak URLs or keys
 - [ ] YAML import validates before writing (no dirty files on failure)
+- [ ] Test fixtures and documentation must not contain realistic/high-entropy API-key-like strings; use obvious placeholders such as `tp-example-redaction-key-12345`
 
 ### Showcase Worlds
 
