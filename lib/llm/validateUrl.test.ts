@@ -111,14 +111,14 @@ describe("sanitizeError", () => {
   });
 
   it("strips tp- API keys without bearer prefix", () => {
-    const result = sanitizeError(new Error("Authentication failed for key tp-cl4iew1f1xj0mel9ai1dq2i8ejz6190vbb0g7i7ii068l4dx"));
-    expect(result).not.toContain("tp-cl4iew1f1xj0mel9ai1dq2i8ejz6190vbb0g7i7ii068l4dx");
+    const result = sanitizeError(new Error("Authentication failed for key tp-example-redaction-key-12345"));
+    expect(result).not.toContain("tp-example-redaction-key-12345");
     expect(result).toContain("[redacted]");
   });
 
   it("strips tp- API keys in various contexts", () => {
-    const result = sanitizeError(new Error("error with key tp-abcdefghijklmnopqrstuvwxyz1234567890abcdef in message"));
-    expect(result).not.toContain("tp-abcdefghijklmnopqrstuvwxyz1234567890abcdef");
+    const result = sanitizeError(new Error("error with key tp-fake-test-token-abcdef0123456789 in message"));
+    expect(result).not.toContain("tp-fake-test-token-abcdef0123456789");
     expect(result).toContain("[redacted]");
   });
 
