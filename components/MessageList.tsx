@@ -151,9 +151,9 @@ export default function MessageList({ messages, characters, language, playerName
                 >
                   {getInitials(msg.speakerName)}
                 </div>
-                <div className="max-w-[90%] sm:max-w-[78%]">
+                <div className="min-w-0 max-w-[90%] sm:max-w-[78%]">
                   <div className="mb-1.5 flex items-end gap-2">
-                    <p className="truncate font-serif text-sm font-semibold" style={{ color: colors.accent }}>
+                    <p className="min-w-0 truncate font-serif text-sm font-semibold" style={{ color: colors.accent }}>
                       {msg.speakerName}
                     </p>
                     {char && <p className="truncate text-[10px] text-prose-muted/56">{char.role}</p>}
@@ -167,7 +167,7 @@ export default function MessageList({ messages, characters, language, playerName
                       boxShadow: `0 18px 38px -34px ${colors.glow}`,
                     }}
                   >
-                    <p className="whitespace-pre-line font-serif text-[15px] leading-relaxed text-prose-dim">
+                    <p className="whitespace-pre-line break-words font-serif text-[15px] leading-relaxed text-prose-dim">
                       {msg.content}
                     </p>
                   </div>

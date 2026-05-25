@@ -46,6 +46,9 @@ const t: Record<string, { zh: string; en: string }> = {
   // Composer
   "composer.placeholder": { zh: "对场景说话...", en: "Speak to the scene..." },
   "composer.sending": { zh: "角色正在说话...", en: "Characters are speaking..." },
+  "composer.directing": { zh: "导演调度中...", en: "Directing scene..." },
+  "composer.investigating": { zh: "探索环境中...", en: "Investigating..." },
+  "composer.extracting": { zh: "整理线索中...", en: "Extracting details..." },
   "composer.send": { zh: "发送", en: "Send" },
   "composer.wait": { zh: "等待", en: "Wait" },
 

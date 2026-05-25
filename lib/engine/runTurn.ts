@@ -178,6 +178,67 @@ function logProviderFailure(stage: string, characterId: string, error: unknown) 
   console.warn(`[LLM:${stage}:${characterId}] ${message.slice(0, 500)}`);
 }
 
+const PERF = process.env.LLM_DEBUG === "1";
+function timing(stage: string, label: string, ms: number) {
+  if (PERF) console.log(`[PERF:${stage}] ${label}: ${ms}ms`);
+}
+async function timed<T>(stage: string, label: string, fn: () => Promise<T>): Promise<T> {
+  const t0 = Date.now();
+  try { return await fn(); }
+  finally { timing(stage, label, Date.now() - t0); }
+}
+
+/**
+ * Scrubs narration output of character dialogue that shouldn't be there.
+ * Defends against director LLM occasionally putting character speech in the narrator block.
+ * Returns the cleaned text, or a fallback string if the content is unrecoverable.
+ */
+function cleanNarrationOutput(raw: string, language: "zh" | "en"): string {
+  let text = raw.trim();
+
+  // Remove quoted dialogue in all forms
+  const quotesToStrip: [string, string][] = [
+    // Chinese
+    ["“", "”"], ["‘", "’"], // "" ''
+    ["「", "」"], ["『", "』"], // 「」『』
+    // English
+    ['"', '"'], ["'", "'"],
+  ];
+  for (const [open, close] of quotesToStrip) {
+    const quoted = new RegExp(`${escapeRe(open)}([^${escapeRe(close)}]+)${escapeRe(close)}`, "g");
+    text = text.replace(quoted, "");
+  }
+
+  // Remove lines that are clearly a character speaking: "Character Name: ..." or "Character name said ..."
+  text = text.replace(/^[^，,\n]{1,40}[:：][^\n]{2,200}$/gm, "");
+  // Remove lines ending in dialogue-style punctuation followed by speech
+  text = text.replace(/["""'""''「」『』].{2,200}["""'""''」』]/g, "");
+
+  // Remove standalone dialogue fragments: if a line is more than 60% Latin letters and looks like a sentence
+  const lines = text.split("\n").filter((l) => {
+    const trimmed = l.trim();
+    if (!trimmed) return false;
+    // If it looks like a quoted speech fragment, drop it
+    if (/^[^「「『『""'']{3,80}[,.。?？!！]$/.test(trimmed) && /[a-zA-Z]{3,}/.test(trimmed)) return false;
+    return true;
+  });
+
+  text = lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+
+  // If after cleaning we're left with almost nothing, return a minimal atmospheric fallback
+  if (text.length < 8) {
+    return language === "zh"
+      ? "空气凝滞，沉默比任何声音都更沉重。"
+      : "The air is still. Silence hangs heavier than any word.";
+  }
+
+  return text;
+}
+
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function cleanCharacterOutput(raw: string): string {
   let content = raw.trim();
   if (content.startsWith('"') && content.endsWith('"')) {
@@ -299,8 +360,8 @@ export async function runTurn(
   if (isInvestigationAction && !isMock) {
     // Investigation actions: generate narration only, skip character dialogue
     selectedCharacters = [];
-    narration = await generateInvestigationNarration(
-      provider, envFallback, world, recent, userInput, wt, relationships, language
+    narration = await timed("narration", "investigation", () =>
+      generateInvestigationNarration(provider, envFallback, world, recent, userInput, wt, relationships, language)
     );
     addMessage({
       id: uuid(),
@@ -312,9 +373,9 @@ export async function runTurn(
       createdAt: new Date().toISOString(),
     });
   } else if (!isMock) {
-    const directorResult = await runDirector(
-      provider, envFallback, world, world.characters, recent, userInput,
-      relationships, wt, existingWorldEvents, language, playerName
+    const directorResult = await timed("director", "director", () =>
+      runDirector(provider, envFallback, world, world.characters, recent, userInput,
+        relationships, wt, existingWorldEvents, language, playerName)
     );
     selectedCharacters = world.characters.filter((c) =>
       directorResult.speakerIds.includes(c.id)
@@ -322,7 +383,7 @@ export async function runTurn(
     sceneUpdate = directorResult.sceneUpdate;
 
     if (directorResult.narration) {
-      narration = directorResult.narration;
+      narration = cleanNarrationOutput(directorResult.narration, language);
       addMessage({
         id: uuid(),
         sessionId,
@@ -350,18 +411,12 @@ export async function runTurn(
   for (const char of selectedCharacters) {
     const { facts, personalMemories } = retrieveMemories(allFacts, allMems, char.id);
     const memoryBlock = formatMemoriesForPrompt(facts, personalMemories);
-
-    const emotionalState = computeEmotionalState(
-      char, relationships, personalMemories, wt.timeOfDay, language
-    );
-
+    const emotionalState = computeEmotionalState(char, relationships, personalMemories, wt.timeOfDay, language);
     const sys = buildSystemPrompt(world, char, language, memoryBlock || undefined, emotionalState, playerName)
       + `\n\nCURRENT ATMOSPHERE: ${atmosphere}`;
-
     const user = buildUserPrompt(recent, userInput, char.id, characterMessages, playerName);
-
-    const { content, degraded: charDegraded } = await generateWithFallback(
-      char, sys, user, provider, envFallback, isMock, language
+    const { content, degraded: charDegraded } = await timed("character", char.id, () =>
+      generateWithFallback(char, sys, user, provider, envFallback, isMock, language)
     );
     if (charDegraded) degraded = true;
 
@@ -410,7 +465,7 @@ export async function runTurn(
     ];
 
     const turnIndex = allFacts.length + 1;
-    const [extracted, relChanges, worldEvts, rawClues] = await Promise.all([
+    const [extracted, relChanges, worldEvts, rawClues] = await timed("extraction", "all-extract", () => Promise.all([
       extractMemories(
         provider, envFallback, world, world.characters, turnMessages, sessionId, turnIndex, language
       ),
@@ -425,7 +480,7 @@ export async function runTurn(
       extractClues(
         provider, envFallback, world, world.characters, turnMessages, sessionId, wt.turnCount, language
       ),
-    ]);
+    ]));
 
     if (extracted.worldFacts.length > 0 || extracted.characterMemories.length > 0) {
       const now = new Date().toISOString();

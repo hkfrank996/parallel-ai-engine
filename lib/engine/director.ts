@@ -54,16 +54,20 @@ function buildDirectorPrompt(
 - 用小说旁白的风格，不是舞台指示
 - 描写感官细节：光线、声音、气味、温度、质感
 - 暗示角色未说出口的情绪（握紧拳头、移开目光、嘴角微颤）
-- 不要重复角色已经说出的话
-- 不要替角色说话或做决定
+- 可以写角色"停顿"、"没有回答"、"转向别处"等反应，但不要写角色说出的具体台词
+- 绝对禁止在 narration 中出现角色的完整对白，不要出现角色名+冒号+台词的格式
+- 绝对禁止用引号包围的台词，即使是半句也不可以
+- 绝对禁止在 narration 中写"XX说：xxx"或"XX低声道：xxx"等格式
+- narration 不是角色对话，是摄像机镜头外的叙事者声音
 - 简洁有力，2-3句话，不要超过60字`
     : `narration is a third-person atmospheric description (2-3 sentences) of the current moment.
 Rules:
 - Write like a novel's narration, not stage directions
 - Describe sensory details: light, sound, smell, temperature, texture
 - Hint at unspoken emotions (clenched fists, averted gaze, trembling lips)
-- Do NOT repeat what characters already said
-- Do NOT speak or decide for characters
+- You MAY write that a character pauses, turns away, or doesn't answer — but NEVER write their actual spoken words
+- NEVER include character dialogue in narration: no quotes, no "Character Name: speech", no "she whispered:", no complete sentences in quotation marks
+- NEVER put spoken words in a character's mouth in narration — that's the character's own dialogue, handled separately
 - Keep it tight: 2-3 sentences, max 60 words`;
 
   const rulesBlock = world.rules.length > 0

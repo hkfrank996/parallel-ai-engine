@@ -236,9 +236,9 @@ export default function SettingsModal({ open, onClose }: Props) {
 
           <p className="settings-note rounded-md border px-3 py-2 text-[11px] leading-relaxed">
             {providerType === "anthropic" || providerType === "openrouter"
-              ? "API key is required for this provider. Settings are saved in your browser only."
+              ? "API key is required for this provider. Settings are saved in your browser only — your key is never sent to any server except when testing the connection or sending a chat message. If you are self-hosting, the server's .env.local provides a local default only; friends using your deployment should bring their own API key."
               : providerType === "ollama"
-                ? "No API key needed for Ollama. Settings are saved in your browser only."
+                ? "No API key needed for Ollama (runs locally). Settings are saved in your browser only."
                 : "API key is optional (empty = no auth header). Settings are saved in your browser only."}
           </p>
 
