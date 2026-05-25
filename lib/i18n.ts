@@ -10,8 +10,14 @@ const t: Record<string, { zh: string; en: string }> = {
   "header.newWorld": { zh: "创建世界", en: "New World" },
   "header.switchWorld": { zh: "切换世界", en: "Switch World" },
   "header.reset": { zh: "清空记录", en: "Reset" },
-  "header.resetConfirm": { zh: "确认清空？再次点击", en: "Confirm reset? Click again" },
-  "header.resetConfirmShort": { zh: "确认清空？", en: "Confirm?" },
+
+  // Reset confirm modal
+  "resetModal.title": { zh: "确认清空当前世界记录？", en: "Confirm clearing current world data?" },
+  "resetModal.description": { zh: "这会清空当前世界的聊天记录、事件、线索、关系变化和时间进度，但不会删除世界设定，也不会影响其他世界。", en: "This will clear the current world's chat history, events, clues, relationship changes, and time progress. World settings and other worlds will not be affected." },
+  "resetModal.cancel": { zh: "取消", en: "Cancel" },
+  "resetModal.confirm": { zh: "确认清空", en: "Confirm" },
+  "resetModal.clearing": { zh: "清空中...", en: "Clearing..." },
+  "resetModal.error": { zh: "清空失败", en: "Failed to clear" },
 
   // Sidebar tabs
   "tab.world": { zh: "世界", en: "World" },
