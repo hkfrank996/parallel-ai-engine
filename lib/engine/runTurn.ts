@@ -192,16 +192,17 @@ async function timed<T>(stage: string, label: string, fn: () => Promise<T>): Pro
  * Scrubs narration output of character dialogue that shouldn't be there.
  * Defends against director LLM occasionally putting character speech in the narrator block.
  * Returns the cleaned text, or a fallback string if the content is unrecoverable.
+ *
+ * Strategy: be CONSERVATIVE — only remove patterns that are unambiguously character speech.
+ * Ambient description ("The air is still.", "月光从高窗倾泻而下") must NEVER be removed.
  */
 function cleanNarrationOutput(raw: string, language: "zh" | "en"): string {
   let text = raw.trim();
 
-  // Remove quoted dialogue in all forms
+  // ── Stage 1: Remove quoted dialogue in all forms ──────────────────────────
   const quotesToStrip: [string, string][] = [
-    // Chinese
     ["“", "”"], ["‘", "’"], // "" ''
     ["「", "」"], ["『", "』"], // 「」『』
-    // English
     ['"', '"'], ["'", "'"],
   ];
   for (const [open, close] of quotesToStrip) {
@@ -209,24 +210,35 @@ function cleanNarrationOutput(raw: string, language: "zh" | "en"): string {
     text = text.replace(quoted, "");
   }
 
-  // Remove lines that are clearly a character speaking: "Character Name: ..." or "Character name said ..."
+  // ── Stage 2: Remove character-colon dialogue lines ────────────────────────
+  // e.g. "Zhang: "Hello""  or "Zhang said: "Hello""
   text = text.replace(/^[^，,\n]{1,40}[:：][^\n]{2,200}$/gm, "");
-  // Remove lines ending in dialogue-style punctuation followed by speech
-  text = text.replace(/["""'""''「」『』].{2,200}["""'""''」』]/g, "");
 
-  // Remove standalone dialogue fragments: if a line is more than 60% Latin letters and looks like a sentence
+  // ── Stage 3: Remove English dialogue-action attribution ───────────────────
+  // e.g.  "Don't worry," she said.   or  "Are you sure?" he asked.
+  text = text.replace(/\s+[""'][A-Za-z]{3,20}\s+(said|asked|replied|whispered|muttered|exclaimed|cried|snapped|laughed|sighed)\b[^""'']*$/gim, "");
+
+  // ── Stage 4: Remove Chinese dialogue attribution (说、道、问、答 etc.) ─────
+  text = text.replace(/\s+[^\n，。、！？]{1,20}[说问道答嚷叹叫吼怒骂哼赞祝祈]道?[。，]?[""']?[^\n]{0,200}$/gm, "");
+  text = text.replace(/\s+[""'][^\n""'']{1,20}[说问道答嚷叹]道?[。，]?[^\n]{0,200}$/gm, "");
+
+  // ── Stage 5: Conservative line-level pass ──────────────────────────────────
+  // Only drop a line if it is VERY clearly a spoken sentence — not atmospheric description.
+  // Criteria: contains a speech-quote pair OR explicitly starts with a character name + attribution.
   const lines = text.split("\n").filter((l) => {
     const trimmed = l.trim();
     if (!trimmed) return false;
-    // If it looks like a quoted speech fragment, drop it
-    if (/^[^「「『『""'']{3,80}[,.。?？!！]$/.test(trimmed) && /[a-zA-Z]{3,}/.test(trimmed)) return false;
+
+    // If the line itself contains an opening quote without closing (mid-quote), drop it —
+    // this means the director left an unfinished quote mid-line, which is dialogue.
+    if (/^[^""'']*[""'][^\n]*$/.test(trimmed) && /[,.。?？!！]$/.test(trimmed)) return false;
+
     return true;
   });
 
   text = lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 
-  // If after cleaning we're left with almost nothing, return a minimal atmospheric fallback
-  if (text.length < 8) {
+  if (text.length < (language === "zh" ? 4 : 6)) {
     return language === "zh"
       ? "空气凝滞，沉默比任何声音都更沉重。"
       : "The air is still. Silence hangs heavier than any word.";
@@ -235,6 +247,7 @@ function cleanNarrationOutput(raw: string, language: "zh" | "en"): string {
   return text;
 }
 
+/** Escapes special regex characters in a string */
 function escapeRe(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
