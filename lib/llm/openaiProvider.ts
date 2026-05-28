@@ -1,4 +1,4 @@
-import { LLMProvider } from "./types";
+import { LLMGenerateOptions, LLMProvider } from "./types";
 
 export class OpenAIProvider implements LLMProvider {
   private apiKey: string;
@@ -13,15 +13,18 @@ export class OpenAIProvider implements LLMProvider {
     this.timeoutMs = Number(process.env.LLM_TIMEOUT_MS || 90000);
   }
 
-  async generate(systemPrompt: string, userPrompt: string): Promise<string> {
+  async generate(systemPrompt: string, userPrompt: string, options?: LLMGenerateOptions): Promise<string> {
     const endpoints = buildChatCompletionsUrls(this.baseUrl);
     let lastEndpoint = endpoints[0];
     let lastError = "";
+    const timeoutMs = options?.timeoutMs ?? this.timeoutMs;
+    const temperature = options?.temperature ?? 0.8;
+    const maxTokens = options?.maxTokens ?? 4096;
 
     for (const endpoint of endpoints) {
       lastEndpoint = endpoint;
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
       let res: Response;
 
       try {
@@ -41,14 +44,14 @@ export class OpenAIProvider implements LLMProvider {
               { role: "system", content: systemPrompt },
               { role: "user", content: userPrompt },
             ],
-            temperature: 0.8,
-            max_tokens: 4096,
+            temperature,
+            max_tokens: maxTokens,
           }),
           signal: controller.signal,
         });
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
-          throw new Error(`OpenAI API timeout after ${this.timeoutMs}ms`);
+          throw new Error(`OpenAI API timeout after ${timeoutMs}ms`);
         }
         throw error;
       } finally {

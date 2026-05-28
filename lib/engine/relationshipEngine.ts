@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { World, Character } from "@/lib/world/types";
 import { Message, Relationship } from "@/lib/storage/store";
-import { LLMProvider } from "@/lib/llm/types";
+import { LLMGenerateOptions, LLMProvider } from "@/lib/llm/types";
 
 interface RelationshipChange {
   fromId: string;
@@ -109,7 +109,8 @@ export async function analyzeRelationships(
   existingRelationships: Relationship[],
   sessionId: string,
   turnIndex: number,
-  language: "zh" | "en" = "en"
+  language: "zh" | "en" = "en",
+  generateOptions?: LLMGenerateOptions
 ): Promise<Relationship[]> {
   const { system, user } = buildExtractionPrompt(
     world, characters, recentMessages, userInput, existingRelationships, language
@@ -118,12 +119,12 @@ export async function analyzeRelationships(
   let rawChanges: RelationshipChange[];
 
   try {
-    const response = await provider.generate(system, user);
+    const response = await provider.generate(system, user, generateOptions);
     rawChanges = parseResponse(response);
   } catch {
     if (envFallback) {
       try {
-        const response = await envFallback.generate(system, user);
+        const response = await envFallback.generate(system, user, generateOptions);
         rawChanges = parseResponse(response);
       } catch {
         return [];

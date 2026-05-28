@@ -21,6 +21,7 @@ import { generateWorldEvents } from "./eventEngine";
 import { computeEmotionalState } from "./emotionalState";
 import { extractClues } from "./clueEngine";
 import { MockProvider } from "@/lib/llm/mockProvider";
+import type { LLMGenerateOptions } from "@/lib/llm/types";
 
 export interface TurnResult {
   userMessage: { id: string; content: string };
@@ -39,6 +40,39 @@ export interface TurnResult {
   clues?: { name: string; description: string; source: string; relatedCharacterId?: string }[];
 }
 
+function envInt(name: string, fallback: number): number {
+  const raw = Number(process.env[name]);
+  return Number.isFinite(raw) && raw > 0 ? raw : fallback;
+}
+
+const GENERATION_OPTIONS = {
+  director: {
+    maxTokens: envInt("LLM_DIRECTOR_MAX_TOKENS", 260),
+    temperature: 0.35,
+    timeoutMs: envInt("LLM_DIRECTOR_TIMEOUT_MS", 18000),
+  } satisfies LLMGenerateOptions,
+  character: {
+    maxTokens: envInt("LLM_CHARACTER_MAX_TOKENS", 220),
+    temperature: 0.8,
+    timeoutMs: envInt("LLM_CHARACTER_TIMEOUT_MS", 12000),
+  } satisfies LLMGenerateOptions,
+  characterRetry: {
+    maxTokens: envInt("LLM_CHARACTER_RETRY_MAX_TOKENS", 160),
+    temperature: 0.4,
+    timeoutMs: envInt("LLM_CHARACTER_RETRY_TIMEOUT_MS", 8000),
+  } satisfies LLMGenerateOptions,
+  narration: {
+    maxTokens: envInt("LLM_NARRATION_MAX_TOKENS", 260),
+    temperature: 0.6,
+    timeoutMs: envInt("LLM_NARRATION_TIMEOUT_MS", 12000),
+  } satisfies LLMGenerateOptions,
+  extraction: {
+    maxTokens: envInt("LLM_EXTRACTION_MAX_TOKENS", 260),
+    temperature: 0.2,
+    timeoutMs: envInt("LLM_EXTRACTION_TIMEOUT_MS", 9000),
+  } satisfies LLMGenerateOptions,
+};
+
 async function generateWithFallback(
   char: Character,
   sys: string,
@@ -53,17 +87,23 @@ async function generateWithFallback(
 
   const generateRaw = async (): Promise<string> => {
     if (isMock && provider instanceof MockProvider) {
-      return provider.generate(sys, user, char.id);
+      return provider.generate(sys, user, { characterId: char.id });
     }
 
     try {
-      return await provider.generate(sys, user);
+      return await provider.generate(sys, user, {
+        ...GENERATION_OPTIONS.character,
+        characterId: char.id,
+      });
     } catch (error) {
       logProviderFailure("character", char.id, error);
       if (envFallback) {
         try {
           degraded = true;
-          return await envFallback.generate(sys, user);
+          return await envFallback.generate(sys, user, {
+            ...GENERATION_OPTIONS.character,
+            characterId: char.id,
+          });
         } catch (fallbackError) {
           logProviderFailure("envFallback", char.id, fallbackError);
           // Use a deterministic in-language fallback below instead of leaking
@@ -83,7 +123,11 @@ async function generateWithFallback(
     try {
       raw = await provider.generate(
         `${sys}\n\nYour previous answer was invalid because it was empty, pure punctuation, or contained action narration. Answer again with one spoken line only.`,
-        user
+        user,
+        {
+          ...GENERATION_OPTIONS.characterRetry,
+          characterId: char.id,
+        }
       );
       content = cleanCharacterOutput(raw);
     } catch (error) {
@@ -156,12 +200,12 @@ Rules:
 Describe what the player perceives.`;
 
   try {
-    return await provider.generate(system, user);
+    return await provider.generate(system, user, GENERATION_OPTIONS.narration);
   } catch {}
 
   if (envFallback) {
     try {
-      return await envFallback.generate(system, user);
+      return await envFallback.generate(system, user, GENERATION_OPTIONS.narration);
     } catch {}
   }
 
@@ -388,7 +432,7 @@ export async function runTurn(
   } else if (!isMock) {
     const directorResult = await timed("director", "director", () =>
       runDirector(provider, envFallback, world, world.characters, recent, userInput,
-        relationships, wt, existingWorldEvents, language, playerName)
+        relationships, wt, existingWorldEvents, language, playerName, GENERATION_OPTIONS.director)
     );
     selectedCharacters = world.characters.filter((c) =>
       directorResult.speakerIds.includes(c.id)
@@ -417,6 +461,27 @@ export async function runTurn(
 
   // --- Inject time atmosphere into character prompts ---
   const atmosphere = timeAtmosphere(wt.timeOfDay);
+
+  // --- Early extraction: start relationship + world-event analysis NOW ---
+  // These don't need current-turn character messages, so they can run in parallel
+  // with the character generation loop below.
+  const earlyExtractionPromise: Promise<[Relationship[], WorldEvent[]]> =
+    !isMock
+      ? timed("extraction", "early-rel+events", () => Promise.all([
+          timed("extraction:relationship", "relationships", () =>
+            analyzeRelationships(
+              provider, envFallback, world, world.characters, recent, userInput,
+              relationships, sessionId, wt.turnCount, language, GENERATION_OPTIONS.extraction
+            )
+          ),
+          timed("extraction:event", "world-events", () =>
+            generateWorldEvents(
+              provider, envFallback, world, world.characters, recent, userInput,
+              relationships, wt, sessionId, wt.turnCount, language, GENERATION_OPTIONS.extraction
+            )
+          ),
+        ]))
+      : Promise.resolve([[], []] as [Relationship[], WorldEvent[]]);
 
   // Sequential generation — each character sees what others already said this turn.
   const characterMessages: { speakerId: string; speakerName: string; content: string }[] = [];
@@ -466,7 +531,7 @@ export async function runTurn(
     createdAt: new Date().toISOString(),
   });
 
-  // --- Memory extraction ---
+  // --- Late extraction: memory + clues (needs current turn messages) ---
   let memoriesExtracted: TurnResult["memoriesExtracted"];
 
   if (!isMock) {
@@ -478,29 +543,30 @@ export async function runTurn(
     ];
 
     const turnIndex = allFacts.length + 1;
-    const [extracted, relChanges, worldEvts, rawClues] = await timed("extraction", "all-extract", () => Promise.all([
-      extractMemories(
-        provider, envFallback, world, world.characters, turnMessages, sessionId, turnIndex, language
+
+    // Memory + clues extraction (needs turn messages, so must run after character loop)
+    const [lateExtracted, rawClues] = await timed("extraction", "late-mem+clues", () => Promise.all([
+      timed("extraction:memory", "memories", () =>
+        extractMemories(
+          provider, envFallback, world, world.characters, turnMessages, sessionId, turnIndex, language, GENERATION_OPTIONS.extraction
+        )
       ),
-      analyzeRelationships(
-        provider, envFallback, world, world.characters, recent, userInput,
-        relationships, sessionId, wt.turnCount, language
-      ),
-      generateWorldEvents(
-        provider, envFallback, world, world.characters, recent, userInput,
-        relationships, wt, sessionId, wt.turnCount, language
-      ),
-      extractClues(
-        provider, envFallback, world, world.characters, turnMessages, sessionId, wt.turnCount, language
+      timed("extraction:clue", "clues", () =>
+        extractClues(
+          provider, envFallback, world, world.characters, turnMessages, sessionId, wt.turnCount, language, GENERATION_OPTIONS.extraction
+        )
       ),
     ]));
 
-    if (extracted.worldFacts.length > 0 || extracted.characterMemories.length > 0) {
+    // Await early extraction results (may have already finished during character loop)
+    const [relChanges, worldEvts] = await earlyExtractionPromise;
+
+    if (lateExtracted.worldFacts.length > 0 || lateExtracted.characterMemories.length > 0) {
       const now = new Date().toISOString();
-      const factsToSave: WorldFact[] = extracted.worldFacts.map((f) => ({
+      const factsToSave: WorldFact[] = lateExtracted.worldFacts.map((f) => ({
         ...f, id: uuid(), createdAt: now,
       }));
-      const memsToSave: CharacterMemory[] = extracted.characterMemories.map((m) => ({
+      const memsToSave: CharacterMemory[] = lateExtracted.characterMemories.map((m) => ({
         ...m, id: uuid(), createdAt: now,
       }));
 
@@ -517,7 +583,7 @@ export async function runTurn(
       };
     }
 
-    // --- Relationship analysis ---
+    // --- Relationship analysis results ---
     const relationshipChanges: TurnResult["relationshipChanges"] = [];
     for (const rel of relChanges) {
       updateRelationship(rel);
@@ -530,7 +596,7 @@ export async function runTurn(
       });
     }
 
-    // --- Dynamic event generation ---
+    // --- Dynamic event generation results ---
     const worldEventResults: TurnResult["worldEvents"] = [];
     for (const evt of worldEvts) {
       addWorldEvent(evt);
@@ -541,7 +607,7 @@ export async function runTurn(
       });
     }
 
-    // --- Clue extraction ---
+    // --- Clue extraction results ---
     const clueResults: TurnResult["clues"] = [];
     for (const rc of rawClues) {
       const clue: Clue = {

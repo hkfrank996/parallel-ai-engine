@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { World, Character } from "@/lib/world/types";
 import { Message } from "@/lib/storage/store";
-import { LLMProvider } from "@/lib/llm/types";
+import { LLMGenerateOptions, LLMProvider } from "@/lib/llm/types";
 
 interface RawClue {
   name: string;
@@ -18,7 +18,8 @@ export async function extractClues(
   turnMessages: Message[],
   sessionId: string,
   turnIndex: number,
-  language: "zh" | "en" = "en"
+  language: "zh" | "en" = "en",
+  generateOptions?: LLMGenerateOptions
 ): Promise<RawClue[]> {
   const charList = characters.map((c) => `${c.id}: ${c.name}`).join(", ");
   const conversation = turnMessages
@@ -64,7 +65,7 @@ Rules:
   const user = `Conversation:\n${conversation}\n\nExtract new clues from this conversation.`;
 
   const tryExtract = async (p: LLMProvider): Promise<RawClue[]> => {
-    const response = await p.generate(system, user);
+    const response = await p.generate(system, user, generateOptions);
     return parseClueResponse(response, characters);
   };
 

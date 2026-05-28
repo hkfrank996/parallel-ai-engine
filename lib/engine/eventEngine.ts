@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { World, Character } from "@/lib/world/types";
 import { Message, Relationship, WorldTime, WorldEvent } from "@/lib/storage/store";
-import { LLMProvider } from "@/lib/llm/types";
+import { LLMGenerateOptions, LLMProvider } from "@/lib/llm/types";
 import { timeAtmosphere } from "./worldTime";
 
 interface DirectorEvent {
@@ -118,7 +118,8 @@ export async function generateWorldEvents(
   worldTime: WorldTime,
   sessionId: string,
   turnIndex: number,
-  language: "zh" | "en" = "en"
+  language: "zh" | "en" = "en",
+  generateOptions?: LLMGenerateOptions
 ): Promise<WorldEvent[]> {
   const { system, user } = buildEventPrompt(
     world, characters, recentMessages, userInput, relationships, worldTime, language
@@ -127,12 +128,12 @@ export async function generateWorldEvents(
   let directorEvents: DirectorEvent[];
 
   try {
-    const response = await provider.generate(system, user);
+    const response = await provider.generate(system, user, generateOptions);
     directorEvents = parseResponse(response);
   } catch {
     if (envFallback) {
       try {
-        const response = await envFallback.generate(system, user);
+        const response = await envFallback.generate(system, user, generateOptions);
         directorEvents = parseResponse(response);
       } catch {
         return [];

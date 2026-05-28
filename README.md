@@ -3,191 +3,135 @@
 [![CI](https://github.com/hkfrank996/parallel-ai-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/hkfrank996/parallel-ai-engine/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> A living narrative world engine for AI-driven murder mysteries, investigative roleplay, and evolving multi-character scenes.
->
-> *一个会记忆、会演化、会推动剧情的 AI 剧本杀世界。*
+Parallel is an AI narrative world engine for murder mysteries, investigative roleplay, and multi-character scenes that keep evolving after every turn.
 
-[中文文档 / Chinese Docs](README_ZH.md)
+[Chinese docs](README_ZH.md)
 
----
+## What it is
 
-## What Is Parallel?
+Parallel is not a single-character chatbot and not a fixed-branch visual novel.
 
-Parallel puts you inside a scene where characters remember, relationships shift, time passes, and the world reacts to your behavior. It is not a chatbot. It is not a visual novel. It is a **living world simulation** — an AI showrunner directs the drama, characters have agency, and the truth itself can change.
+Each player message enters a living scene:
 
-Walk into a rainy night market in Neon Harbor. Talk to a street doctor, an information broker, a runaway courier. Ask the wrong question and someone gets nervous. Expose a secret and others adjust their strategy. Ignore a clue and the director hands it to someone else to detonate. Even the main plot can change if you push the story somewhere the author never imagined.
+- a director decides who should respond and how the moment should feel
+- characters answer from their own personality, memory, and relationships
+- the world stores facts, memories, clues, events, and time progression
+- the next turn starts from the updated world state, not from scratch
 
-## Why It Is Different
+The result is closer to an AI-driven murder mystery engine than a chat UI.
 
-| | Chatbot / Roleplay | Visual Novel | **Parallel** |
-|---|---|---|---|
-| Script | Fixed or improvised | Pre-written branches | **AI showrunner adapts in real-time** |
-| Characters | Single persona | Static sprites | **Multi-character, each with memory and agency** |
-| World state | Resets on refresh | Checkpoint-based | **Persistent — relationships, events, emotions all evolve** |
-| Player impact | Cosmetic | Branch selection | **Every action reshapes the world** |
+## Why it is interesting
 
-## Core Features
+- Multi-character orchestration instead of one assistant persona
+- Persistent world state across turns and sessions
+- Relationship changes, clue extraction, and event generation
+- Provider-agnostic LLM layer with OpenAI-compatible and Anthropic-style support
+- World import/export through YAML so new scenarios can be authored without code
 
-- **AI Showrunner** — a director that manages narrative tension, triggers twists, and adapts the plot based on player behavior
-- **Multi-Character Scenes** — multiple characters speak in turn, each with their own personality, secrets, and emotional state
-- **Persistent Memory** — characters remember what you said across sessions; round 10 naturally references round 2
-- **Evolving Relationships** — trust, hostility, and dependency shift with every interaction
-- **Dynamic Events** — the world generates new events when tension peaks or stagnation is detected
-- **Emotional States** — character mood is computed from relationships, memories, time of day, and personality
-- **Character Reflection** — characters form high-level insights from accumulated experiences
-- **World Time** — day/night cycle affects atmosphere and character availability
-- **Clue System** — clues are auto-extracted from dialogue and tracked in a sidebar
-- **Investigation Actions** — look around, listen, organize thoughts for cinematic sensory narration
-- **Genre-Agnostic Engine** — supports any genre: cyberpunk mystery, dark fantasy, sci-fi conspiracy, modern urban
-- **World Workshop** — create and export/import custom worlds via YAML without writing code
+## How a turn works
 
-## Quick Start
+1. The browser sends a message to `POST /api/chat`.
+2. `runTurn()` advances world time and loads the active scene state.
+3. The director picks speakers and generates narration.
+4. Characters reply in sequence with their own memory and emotional context.
+5. Post-turn analysis updates facts, memories, relationships, clues, and optional world events.
 
-### Prerequisites
+Architecture details live in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Quick start
+
+Requirements:
 
 - Node.js 20+
 - npm
 
-### Local Development
+Run locally:
 
 ```bash
 npm install
 npm run dev
-# Open http://localhost:3000
 ```
 
-### Docker
+Then open [http://localhost:3000](http://localhost:3000).
 
-```bash
-docker build -t parallel .
-docker run --rm -p 3000:3000 --env-file .env.local -v ${PWD}/data:/app/data parallel
-```
+Windows users can also double-click `start.bat`.
 
-Windows PowerShell:
+## LLM setup
 
-```powershell
-docker run --rm -p 3000:3000 --env-file .env.local -v "${PWD}/data:/app/data" parallel
-```
+Parallel supports OpenAI-compatible, Anthropic-style, OpenRouter, and Ollama endpoints. When no provider is configured, it falls back to mock mode.
 
-The container runs in Mock Mode if no provider is configured.
+There are two places to configure LLM access, and they serve different purposes:
 
-### Windows (no terminal)
+### `.env.local` — local development defaults
 
-Double-click `start.bat`, then open `http://localhost:3000`.
-
-## Model Configuration
-
-Copy `.env.local.example` to `.env.local` and configure a provider:
+This file sits on your machine and is gitignored. It provides defaults for `npm run dev` / `npm run start` so you don't have to configure anything in the browser during development.
 
 ```env
-# OpenAI (official)
 LLM_PROVIDER=openai
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=your_api_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_MODEL=gpt-4o-mini
-
-# OpenRouter
-# LLM_PROVIDER=openrouter
-# OPENROUTER_API_KEY=your_openrouter_api_key_here
-# OPENROUTER_MODEL=openai/gpt-4o-mini
-
-# Ollama (local, no key needed)
-# LLM_PROVIDER=ollama
-# OLLAMA_BASE_URL=http://localhost:11434/v1
-# OLLAMA_MODEL=llama3
-
-# Custom OpenAI-compatible endpoint (e.g. self-hosted or third-party)
-# LLM_PROVIDER=openai
-# OPENAI_API_KEY=your_custom_api_key_here
-# OPENAI_BASE_URL=https://your-custom-endpoint.example.com/v1
-# OPENAI_MODEL=your-model-name
 ```
 
-### Provider Support Matrix
+More configuration examples are in [docs/CONFIG.md](docs/CONFIG.md).
 
-| Provider | Protocol | Requires API Key |
-|----------|----------|-----------------|
-| **OpenAI-compatible** | `/v1/chat/completions` | No (empty = no auth header) |
-| **Anthropic** | `/v1/messages` | **Yes** |
-| **OpenRouter** | `/v1/chat/completions` | **Yes** |
-| **Ollama** | `/v1/chat/completions` | No |
-| **Mock Mode** | — | No (only when no provider is configured at all) |
+### Settings modal — browser-local configuration
 
-> Parallel enters Mock Mode **only** when no provider is configured. An OpenAI-compatible provider with an empty key sends requests without an Authorization header — this is not Mock Mode.
+The in-app Settings modal stores provider, API URL, model, and API key in **browser localStorage**. This configuration:
 
-## Showcase Worlds
+- is per-browser, per-device — it doesn't travel with the code
+- is never sent to the server except in the body of `/api/chat` and `/api/llm/test` requests
+- overrides `.env.local` when present
+- **is not bundled into the build** — if you give a copy of this project to a friend, they get your `.env.local` defaults (if you didn't gitignore it), but NOT your browser localStorage
 
-9 demo worlds spanning 4 genres — open the app and pick one:
+### Sharing with friends
 
-| World | Genre | Tagline |
-|-------|-------|---------|
-| **Neon Harbor** | Cyberpunk mystery | A rainy cyberpunk port where everyone owes someone something |
-| **Crimson Keep** | Dark fantasy | An ancient castle where the king's advisor is dead and the prophecy demands justice before dawn |
-| **Orbital Station Sigma** | Sci-fi conspiracy | A deep-space station where the air is running out and someone just killed the captain |
-| **Shadow Realm** | Dark fantasy | A dying magical realm where three mages hold the last light |
-| **Jade Sect Summons** | Xianxia dark fantasy | Three cultivators answer a forbidden summons beneath a jade mountain |
-| **Hollow Creek** | Modern mystery | A small town where the creek runs red and nobody calls the sheriff |
-| **Last Light Station** | Sci-fi survival | A deep-space relay where the rescue ship isn't coming and the air is running out |
-| **Glass Tower** | Cyberpunk mystery | A corporate skyscraper where the CEO vanished and every floor has a secret |
-| **Vermillion Manor** | Dark fantasy mystery | A dead patriarch, a locked room, and three heirs who all had a reason |
+If you give someone a local copy of this project:
 
-Each world: 3 characters with distinct personalities, relationship webs, secrets, and goals.
+- `.env.local` is gitignored by default — it won't be in the repo unless you explicitly committed it
+- Each person needs to create their own `.env.local` or configure Settings in their own browser
+- The server never broadcasts your API key to connected browsers
+- If you want to share a pre-configured setup, include `.env.local.example` with placeholder values and instructions
 
-## Testing
+## Current status
 
-```bash
-npm run test     # 47 vitest tests (SSRF, error sanitization, import safety)
-npm run lint     # TypeScript type check
-npm run build    # Production build
-```
+The project is at a polished prototype stage:
 
-## Import / Export
+- playable multi-world experience
+- test, lint, and build coverage in CI
+- recent work on narration cleanup, destructive action confirmation, browser storage fallback, and provider compatibility
+- active performance tuning on `/api/chat`, especially director and post-turn analysis latency
 
-Export a world and its session data:
+## What is in the repo
 
-```bash
-curl "http://localhost:3000/api/world/export?worldId=neon-harbor"
-# Returns: { worldId, yaml, sessionData }
-```
+- `app/`: Next.js pages and API routes
+- `components/`: UI for the play surface, settings, sidebar, and timeline
+- `lib/engine/`: turn orchestration, director, memory, relationships, events, clues
+- `lib/llm/`: provider resolution, API clients, URL validation
+- `data/worlds/`: YAML world definitions
+- `docs/`: architecture, config, API, roadmap, world format
 
-Import a world from YAML:
+## Security and local data
 
-```bash
-curl -X POST http://localhost:3000/api/world/import \
-  -H "Content-Type: application/json" \
-  -d '{"yaml": "id: my-world\nname: My World\n..."}'
-```
+These files are intentionally not committed:
 
-Constraints: max 500 KB YAML, max 10,000 session entries. Import validates before writing — no dirty files on failure.
+- `.env.local`: local provider keys and endpoints
+- `data/store.json`: runtime session state
+- `CODEX_HANDOFF.md`: private handoff notes
 
-## Security
+The project also includes:
 
-- `.env.local` — gitignored, never commit API keys
-- `data/store.json` — gitignored, runtime session data
-- `CODEX_HANDOFF.md` — gitignored, private handoff notes
-- SSRF protection blocks private IPs, cloud metadata, localhost
-- Error messages are sanitized (URLs and API keys stripped)
-- YAML parsing uses `CORE_SCHEMA` (no code execution)
+- SSRF protection for provider URLs
+- sanitized error output
+- browser-local settings that do not expose server-side keys back to the UI
 
-## Documentation
+## Docs
 
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Directory structure, request flow, provider system, extension layer
-- **[docs/API.md](docs/API.md)** — API endpoint reference
-- **[docs/CONFIG.md](docs/CONFIG.md)** — LLM provider configuration guide
-- **[docs/WORLD_FORMAT.md](docs/WORLD_FORMAT.md)** — World YAML schema, field reference, common pitfalls
-- **[docs/ROADMAP.md](docs/ROADMAP.md)** — Product roadmap
-- **[docs/ROADMAP_ZH.md](docs/ROADMAP_ZH.md)** — 产品路线图（中文）
-- **[docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)** — Phase 4 + v1.0 release checklist
-
-## Current Status
-
-**v1.0.0 ready for release (2026-05-24)**
-
-- Phase 1 (Stable Layer): SSRF protection, error sanitization, test suite ✅
-- Phase 2 (Showcase Worlds): 9 demo worlds across 4 genres ✅
-- Phase 3 (Release Docs): README, docs/, package review ✅
-- Phase 4 (Pre-release QA): Security review, browser smoke, CI green ✅
-- v1.0 Closeout: Version bump, CHANGELOG, release notes ready ✅
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/API.md](docs/API.md)
+- [docs/CONFIG.md](docs/CONFIG.md)
+- [docs/WORLD_FORMAT.md](docs/WORLD_FORMAT.md)
+- [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ## License
 

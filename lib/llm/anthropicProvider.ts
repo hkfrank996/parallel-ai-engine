@@ -1,4 +1,4 @@
-import { LLMProvider } from "./types";
+import { LLMGenerateOptions, LLMProvider } from "./types";
 
 export class AnthropicProvider implements LLMProvider {
   private apiKey: string;
@@ -16,12 +16,15 @@ export class AnthropicProvider implements LLMProvider {
     this.useBearer = !lower.includes("anthropic.com") && !lower.includes("bigmodel.cn");
   }
 
-  async generate(systemPrompt: string, userPrompt: string): Promise<string> {
+  async generate(systemPrompt: string, userPrompt: string, options?: LLMGenerateOptions): Promise<string> {
     let base = this.baseUrl;
     if (!base.includes("/v1")) {
       base = base.replace(/\/$/, "") + "/v1";
     }
     const url = `${base}/messages`;
+    const timeoutMs = options?.timeoutMs ?? this.timeoutMs;
+    const temperature = options?.temperature ?? 0.8;
+    const maxTokens = options?.maxTokens ?? 800;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -34,7 +37,7 @@ export class AnthropicProvider implements LLMProvider {
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     let res: Response;
     try {
@@ -43,8 +46,8 @@ export class AnthropicProvider implements LLMProvider {
         headers,
         body: JSON.stringify({
           model: this.model,
-          max_tokens: 800,
-          temperature: 0.8,
+          max_tokens: maxTokens,
+          temperature,
           system: systemPrompt,
           messages: [{ role: "user", content: userPrompt }],
         }),
@@ -52,7 +55,7 @@ export class AnthropicProvider implements LLMProvider {
       });
     } catch (e) {
       if ((e as Error).name === "AbortError") {
-        throw new Error(`Anthropic API timeout after ${this.timeoutMs}ms`);
+        throw new Error(`Anthropic API timeout after ${timeoutMs}ms`);
       }
       throw e;
     } finally {

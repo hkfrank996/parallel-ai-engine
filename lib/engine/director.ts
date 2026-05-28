@@ -1,6 +1,6 @@
 import { World, Character } from "@/lib/world/types";
 import { Message, Relationship, WorldTime, WorldEvent } from "@/lib/storage/store";
-import { LLMProvider } from "@/lib/llm/types";
+import { LLMGenerateOptions, LLMProvider } from "@/lib/llm/types";
 import { computeNarrativeTension } from "./emotionalState";
 
 interface DirectorResult {
@@ -184,14 +184,15 @@ export async function runDirector(
   worldTime: WorldTime,
   worldEvents: WorldEvent[],
   language: "zh" | "en" = "en",
-  playerName?: string
+  playerName?: string,
+  generateOptions?: LLMGenerateOptions
 ): Promise<DirectorResult> {
   const { system, user } = buildDirectorPrompt(
     world, characters, recentMessages, userInput, relationships, worldTime, worldEvents, language, playerName
   );
 
   const tryRun = async (p: LLMProvider): Promise<DirectorResult> => {
-    const response = await p.generate(system, user);
+    const response = await p.generate(system, user, generateOptions);
     const result = parseDirectorResponse(response);
     const activeIds = new Set(characters.map((c) => c.id));
 

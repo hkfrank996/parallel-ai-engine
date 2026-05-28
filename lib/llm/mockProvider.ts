@@ -1,4 +1,4 @@
-import { LLMProvider } from "./types";
+import { LLMGenerateOptions, LLMProvider } from "./types";
 
 const mockResponses: Record<string, string[]> = {
   mira: [
@@ -25,8 +25,8 @@ const mockResponses: Record<string, string[]> = {
 };
 
 export class MockProvider implements LLMProvider {
-  async generate(_systemPrompt: string, _userPrompt: string, characterId?: string): Promise<string> {
-    const id = characterId || "mira";
+  async generate(_systemPrompt: string, _userPrompt: string, options?: LLMGenerateOptions): Promise<string> {
+    const id = options?.characterId || "mira";
     const pool = mockResponses[id] || mockResponses.mira;
     return pool[Math.floor(Math.random() * pool.length)];
   }

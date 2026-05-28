@@ -105,4 +105,16 @@ describe("AnthropicProvider.generate", () => {
     expect(capturedHeaders["x-api-key"]).toBe("sk-ant-...");
     expect(capturedHeaders["Authorization"]).toBeUndefined();
   });
+
+  it("forwards task-specific generation options", async () => {
+    let capturedBody: Record<string, unknown> = {};
+    const p = new AnthropicProvider("key", "https://example-anthropic-compatible.test/anthropic", "model");
+    global.fetch = async (_url, init) => {
+      capturedBody = JSON.parse(String(init?.body));
+      return makeFakeResponse({ content: [{ type: "text", text: "ok" }] }) as Response;
+    };
+    await p.generate("sys", "user", { maxTokens: 123, temperature: 0.25 });
+    expect(capturedBody.max_tokens).toBe(123);
+    expect(capturedBody.temperature).toBe(0.25);
+  });
 });

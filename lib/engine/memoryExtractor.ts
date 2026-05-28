@@ -1,6 +1,6 @@
 import { World, Character } from "@/lib/world/types";
 import { Message, WorldFact, CharacterMemory } from "@/lib/storage/store";
-import { LLMProvider } from "@/lib/llm/types";
+import { LLMGenerateOptions, LLMProvider } from "@/lib/llm/types";
 
 export interface ExtractedMemories {
   worldFacts: Omit<WorldFact, "id" | "createdAt">[];
@@ -117,17 +117,18 @@ export async function extractMemories(
   turnMessages: Message[],
   sessionId: string,
   turnIndex: number,
-  language: "zh" | "en" = "en"
+  language: "zh" | "en" = "en",
+  generateOptions?: LLMGenerateOptions
 ): Promise<ExtractedMemories> {
   const { system, user } = buildExtractionPrompt(world, characters, turnMessages, turnIndex, language);
 
   let response: string;
   try {
-    response = await provider.generate(system, user);
+    response = await provider.generate(system, user, generateOptions);
   } catch {
     if (envFallback) {
       try {
-        response = await envFallback.generate(system, user);
+        response = await envFallback.generate(system, user, generateOptions);
       } catch {
         return { worldFacts: [], characterMemories: [] };
       }
