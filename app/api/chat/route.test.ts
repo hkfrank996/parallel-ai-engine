@@ -126,7 +126,7 @@ describe("/api/chat streaming contract", () => {
     const lines = text.trim().split("\n").map((l: string) => JSON.parse(l));
 
     // Find reset event
-    const resetEvent = lines.find((l: { type: string; data: { kind?: string } }) =>
+    const resetEvent = lines.find((l: { type: string; data: { kind?: string; characterId?: string } }) =>
       l.type === "content" && l.data.kind === "character_reset"
     );
     expect(resetEvent).toBeTruthy();
@@ -134,7 +134,7 @@ describe("/api/chat streaming contract", () => {
 
     // Verify reset comes before the fallback delta
     const resetIdx = lines.indexOf(resetEvent);
-    const fallbackDelta = lines.find((l: { type: string; data: { kind?: string; text?: string } }, i: number) =>
+    const fallbackDelta = lines.find((l: { type: string; data: { kind?: string; characterId?: string; text?: string } }, i: number) =>
       i > resetIdx && l.type === "content" && l.data.kind === "character_delta" && l.data.characterId === "mira"
     );
     expect(fallbackDelta).toBeTruthy();
