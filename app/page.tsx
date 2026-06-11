@@ -89,6 +89,7 @@ export default function Home() {
     degraded?: boolean;
   } | null>(null);
   const [sidebarTab, setSidebarTab] = useState<"world" | "timeline">("world");
+  const [streamingMessages, setStreamingMessages] = useState<{ speakerId: string; speakerName: string; content: string; isNarrator?: boolean }[]>([]);
   const [worldList, setWorldList] = useState<{ id: string; name: string; genre: string }[]>([]);
   const [showWorldPicker, setShowWorldPicker] = useState(false);
   const [playerName, setPlayerName] = useState<string>("");
@@ -145,6 +146,7 @@ export default function Home() {
     setError(null);
     setMemoryNotice(null);
     setTurnNotice(null);
+    setStreamingMessages([]);
 
     const tempUserMsg: Message = {
       id: `temp-${Date.now()}`,
@@ -165,6 +167,7 @@ export default function Home() {
         language,
         worldId: data.world.id,
         playerName: playerName || undefined,
+        stream: true,
       };
       // Send llmConfig whenever the user has explicitly configured a provider,
       // even if apiKey is empty (e.g. Ollama, local OpenAI-compatible servers).
@@ -189,30 +192,113 @@ export default function Home() {
         throw new Error(err.error || "Chat request failed");
       }
 
-      const result = await res.json();
+      const contentType = res.headers.get("content-type") || "";
 
-      if (result.memoriesExtracted && (
-        result.memoriesExtracted.worldFacts?.length > 0 ||
-        result.memoriesExtracted.characterMemories?.length > 0
-      )) {
-        setMemoryNotice(result.memoriesExtracted);
+      if (contentType.includes("ndjson") && res.body) {
+        // --- Streaming path ---
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let finalResult: Record<string, unknown> | null = null;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop()!;
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            let event: { type: string; data: unknown };
+            try {
+              event = JSON.parse(line);
+            } catch { continue; }
+
+            if (event.type === "content") {
+              const d = event.data as { kind: string; characterId?: string; characterName?: string; text: string; };
+              if (d.kind === "narration_done") {
+                setStreamingMessages((prev) => {
+                  const existing = prev.find((m) => m.isNarrator);
+                  if (existing) {
+                    return prev.map((m) => m.isNarrator ? { ...m, content: d.text } : m);
+                  }
+                  return [...prev, { speakerId: "narrator", speakerName: language === "zh" ? "旁白" : "Narrator", content: d.text, isNarrator: true }];
+                });
+              } else if (d.kind === "character_delta" && d.characterId) {
+                setStreamingMessages((prev) => {
+                  const existing = prev.find((m) => m.speakerId === d.characterId);
+                  if (existing) {
+                    return prev.map((m) =>
+                      m.speakerId === d.characterId ? { ...m, content: m.content + d.text } : m
+                    );
+                  }
+                  return [...prev, { speakerId: d.characterId!, speakerName: d.characterName || d.characterId!, content: d.text }];
+                });
+              } else if (d.kind === "character_reset" && d.characterId) {
+                // Stream failed after partial output — clear accumulated text for this character
+                setStreamingMessages((prev) => prev.filter((m) => m.speakerId !== d.characterId));
+              }
+            } else if (event.type === "done") {
+              finalResult = event.data as Record<string, unknown>;
+            } else if (event.type === "error") {
+              throw new Error((event.data as { message: string }).message);
+            }
+          }
+        }
+
+        // Process final result
+        if (finalResult) {
+          const result = finalResult;
+          if (result.memoriesExtracted && (
+            (result.memoriesExtracted as { worldFacts?: unknown[] }).worldFacts?.length ||
+            (result.memoriesExtracted as { characterMemories?: unknown[] }).characterMemories?.length
+          )) {
+            setMemoryNotice(result.memoriesExtracted as MemoryNotice);
+          }
+
+          if (result.worldTime || (result.relationshipChanges as unknown[])?.length > 0 || (result.worldEvents as unknown[])?.length > 0 || (result.clues as unknown[])?.length > 0 || result.degraded) {
+            setTurnNotice({
+              worldTime: result.worldTime as { day: number; timeOfDay: string; label: string },
+              relationshipChanges: result.relationshipChanges as { fromId: string; toId: string; trust: number; hostility: number; reason: string }[],
+              worldEvents: result.worldEvents as { type: string; description: string; impact: string }[],
+              clues: result.clues as { name: string; description: string; source: string }[],
+              degraded: result.degraded as boolean,
+            });
+          }
+        }
+
+        // Clear streaming messages and reload final state
+        setStreamingMessages([]);
+        await loadWorld(data.world.id);
+      } else {
+        // --- Non-streaming fallback ---
+        const result = await res.json();
+
+        if (result.memoriesExtracted && (
+          result.memoriesExtracted.worldFacts?.length > 0 ||
+          result.memoriesExtracted.characterMemories?.length > 0
+        )) {
+          setMemoryNotice(result.memoriesExtracted);
+        }
+
+        if (result.worldTime || result.relationshipChanges?.length > 0 || result.worldEvents?.length > 0 || result.clues?.length > 0 || result.degraded) {
+          setTurnNotice({
+            worldTime: result.worldTime,
+            relationshipChanges: result.relationshipChanges,
+            worldEvents: result.worldEvents,
+            clues: result.clues,
+            degraded: result.degraded,
+          });
+        }
+
+        await loadWorld(data.world.id);
       }
-
-      if (result.worldTime || result.relationshipChanges?.length > 0 || result.worldEvents?.length > 0 || result.clues?.length > 0 || result.degraded) {
-        setTurnNotice({
-          worldTime: result.worldTime,
-          relationshipChanges: result.relationshipChanges,
-          worldEvents: result.worldEvents,
-          clues: result.clues,
-          degraded: result.degraded,
-        });
-      }
-
-      await loadWorld(data.world.id);
     } catch (e) {
       setError(String(e));
     } finally {
       setSending(false);
+      setStreamingMessages([]);
     }
   };
 
@@ -513,6 +599,7 @@ export default function Home() {
             language={language}
             playerName={playerName}
             sending={sending}
+            streamingMessages={streamingMessages}
           />
           <MessageComposer
             onSend={handleSend}

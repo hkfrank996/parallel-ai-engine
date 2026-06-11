@@ -372,3 +372,65 @@ describe("GENERATION_OPTIONS passthrough", () => {
     expect(optionsArg).toMatchObject({ maxTokens: 260, temperature: 0.2, timeoutMs: 9000 });
   });
 });
+
+// ============================================================
+// Group 6: Stream fallback — partial delta + reset
+// ============================================================
+describe("runTurn stream fallback", () => {
+  it("emits character_reset before fallback content when stream fails after partial output", async () => {
+    // Set up a provider with stream() that yields partial content then throws
+    let callCount = 0;
+    async function* mockStream() {
+      callCount++;
+      yield "partial ";
+      throw new Error("stream connection lost");
+    }
+    const mockGenerateSimple = vi.fn(async () => "Fallback complete text");
+    providerMocks.getProvider.mockReturnValue({
+      provider: { generate: mockGenerateSimple, stream: mockStream } as any,
+      isMock: false,
+      envFallback: null,
+    });
+
+    const events: { type: string; data: unknown }[] = [];
+    const mockOnEvent = vi.fn((event: { type: string; data: unknown }) => events.push(event));
+
+    const { runTurn } = await import("./runTurn");
+    await runTurn("session-1", makeWorld(), "Hello", undefined, "en", "Player", mockOnEvent);
+
+    // Find character_reset and character_delta events for the same character
+    const resetEvents = events.filter((e) =>
+      e.type === "content" && (e.data as { kind: string }).kind === "character_reset"
+    );
+    const deltaEvents = events.filter((e) =>
+      e.type === "content" && (e.data as { kind: string }).kind === "character_delta"
+    );
+
+    // A reset event must have been emitted
+    expect(resetEvents.length).toBeGreaterThanOrEqual(1);
+
+    // For the character that had partial stream, verify ordering:
+    // 1. partial deltas, 2. reset, 3. fallback full text
+    const charId = (resetEvents[0].data as { characterId: string }).characterId;
+    const charDeltas = deltaEvents.filter(
+      (e) => (e.data as { characterId: string }).characterId === charId
+    );
+    const resetIdx = events.findIndex(
+      (e) => e.type === "content" && (e.data as { kind: string; characterId: string }).kind === "character_reset" && (e.data as { characterId: string }).characterId === charId
+    );
+
+    // There should be deltas before the reset (from partial stream)
+    const deltasBeforeReset = events.filter(
+      (e, i) => i < resetIdx && e.type === "content" && (e.data as { kind: string }).kind === "character_delta" && (e.data as { characterId: string }).characterId === charId
+    );
+    expect(deltasBeforeReset.length).toBeGreaterThanOrEqual(1);
+
+    // There should be a delta after the reset (from fallback)
+    const deltasAfterReset = events.filter(
+      (e, i) => i > resetIdx && e.type === "content" && (e.data as { kind: string }).kind === "character_delta" && (e.data as { characterId: string }).characterId === charId
+    );
+    expect(deltasAfterReset.length).toBe(1);
+    // The fallback delta should contain the full text, not the partial prefix
+    expect((deltasAfterReset[0].data as { text: string }).text).toBe("Fallback complete text");
+  });
+});

@@ -73,6 +73,8 @@ const GENERATION_OPTIONS = {
   } satisfies LLMGenerateOptions,
 };
 
+type StreamEvent = { kind: "delta"; text: string } | { kind: "reset" };
+
 async function generateWithFallback(
   char: Character,
   sys: string,
@@ -80,14 +82,36 @@ async function generateWithFallback(
   provider: ReturnType<typeof getProvider>["provider"],
   envFallback: ReturnType<typeof getProvider>["envFallback"],
   isMock: boolean,
-  language: "zh" | "en"
+  language: "zh" | "en",
+  onStreamEvent?: (event: StreamEvent) => void
 ): Promise<{ content: string; degraded: boolean }> {
   let raw: string;
   let degraded = false;
+  let streamed = false;
 
   const generateRaw = async (): Promise<string> => {
     if (isMock && provider instanceof MockProvider) {
       return provider.generate(sys, user, { characterId: char.id });
+    }
+
+    // Try token streaming if callback provided and provider supports it
+    if (onStreamEvent && provider.stream) {
+      try {
+        let accumulated = "";
+        for await (const delta of provider.stream(sys, user, {
+          ...GENERATION_OPTIONS.character,
+          characterId: char.id,
+        })) {
+          accumulated += delta;
+          onStreamEvent({ kind: "delta", text: delta });
+        }
+        streamed = true;
+        return accumulated;
+      } catch (streamError) {
+        // Streaming failed after partial output — signal frontend to reset accumulated text
+        if (onStreamEvent) onStreamEvent({ kind: "reset" });
+        logProviderFailure("character:stream", char.id, streamError);
+      }
     }
 
     try {
@@ -118,6 +142,11 @@ async function generateWithFallback(
 
   raw = await generateRaw();
   let content = cleanCharacterOutput(raw);
+
+  // If streaming wasn't used but callback was provided, emit full content as single delta
+  if (!streamed && onStreamEvent && content) {
+    onStreamEvent({ kind: "delta", text: content });
+  }
 
   if (isBadCharacterOutput(content) && !(isMock && provider instanceof MockProvider)) {
     try {
@@ -357,9 +386,11 @@ export async function runTurn(
   userInput: string,
   llmConfig?: LLMConfig,
   language: "zh" | "en" = "en",
-  playerName?: string
+  playerName?: string,
+  onEvent?: (event: { type: string; data: unknown }) => void
 ): Promise<TurnResult> {
   const { provider, isMock, envFallback } = getProvider(llmConfig);
+  const _turnStart = Date.now();
   const recent = getRecentMessages(sessionId, 30);
   const isFirstTurn = recent.length === 0;
 
@@ -450,6 +481,7 @@ export async function runTurn(
         content: narration,
         createdAt: new Date().toISOString(),
       });
+      onEvent?.({ type: "content", data: { kind: "narration_done", text: narration } });
     }
   } else {
     selectedCharacters = world.characters.slice(0, 3);
@@ -493,8 +525,19 @@ export async function runTurn(
     const sys = buildSystemPrompt(world, char, language, memoryBlock || undefined, emotionalState, playerName)
       + `\n\nCURRENT ATMOSPHERE: ${atmosphere}`;
     const user = buildUserPrompt(recent, userInput, char.id, characterMessages, playerName);
+
+    onEvent?.({ type: "status", data: { phase: "character_started", characterId: char.id, characterName: char.name } });
+
     const { content, degraded: charDegraded } = await timed("character", char.id, () =>
-      generateWithFallback(char, sys, user, provider, envFallback, isMock, language)
+      generateWithFallback(char, sys, user, provider, envFallback, isMock, language,
+        onEvent ? (event) => {
+          if (event.kind === "reset") {
+            onEvent({ type: "content", data: { kind: "character_reset", characterId: char.id } });
+          } else {
+            onEvent({ type: "content", data: { kind: "character_delta", characterId: char.id, characterName: char.name, text: event.text } });
+          }
+        } : undefined
+      )
     );
     if (charDegraded) degraded = true;
 
@@ -545,6 +588,7 @@ export async function runTurn(
     const turnIndex = allFacts.length + 1;
 
     // Memory + clues extraction (needs turn messages, so must run after character loop)
+    onEvent?.({ type: "status", data: { phase: "extraction_started" } });
     const [lateExtracted, rawClues] = await timed("extraction", "late-mem+clues", () => Promise.all([
       timed("extraction:memory", "memories", () =>
         extractMemories(
@@ -631,6 +675,7 @@ export async function runTurn(
       }
     }
 
+    timing("turn", "total", Date.now() - _turnStart);
     return {
       userMessage: { id: userMsgId, content: userInput },
       narration,
@@ -646,6 +691,7 @@ export async function runTurn(
     };
   }
 
+  timing("turn", "total", Date.now() - _turnStart);
   return {
     userMessage: { id: userMsgId, content: userInput },
     narration,

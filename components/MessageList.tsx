@@ -6,12 +6,20 @@ import { Character } from "@/lib/world/types";
 import { T, type Lang } from "@/lib/i18n";
 import { getCharacterColors, getInitials } from "@/lib/ui/characterColors";
 
+interface StreamingMessage {
+  speakerId: string;
+  speakerName: string;
+  content: string;
+  isNarrator?: boolean;
+}
+
 interface Props {
   messages: Message[];
   characters: Character[];
   language: Lang;
   playerName?: string;
   sending: boolean;
+  streamingMessages?: StreamingMessage[];
 }
 
 function LoadingBubble({ language }: { language: Lang }) {
@@ -46,12 +54,12 @@ function LoadingBubble({ language }: { language: Lang }) {
   );
 }
 
-export default function MessageList({ messages, characters, language, playerName, sending }: Props) {
+export default function MessageList({ messages, characters, language, playerName, sending, streamingMessages }: Props) {
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, sending]);
+  }, [messages, sending, streamingMessages]);
 
   if (messages.length === 0) {
     return (
@@ -176,7 +184,59 @@ export default function MessageList({ messages, characters, language, playerName
             );
           })}
 
-          {sending && <LoadingBubble language={language} />}
+          {/* Streaming messages — real-time content from token/phase streaming */}
+          {streamingMessages?.map((msg, idx) => {
+            if (msg.isNarrator) {
+              return (
+                <div key="stream-narrator" className="flex justify-center animate-fade-in">
+                  <div className="max-w-[80%] rounded-[1rem] border border-edge/30 bg-abyss/40 px-5 py-3 text-center">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-prose-muted/46 mb-1.5">
+                      {language === "zh" ? "旁白" : "Narrator"}
+                    </p>
+                    <p className="font-serif text-sm italic leading-relaxed text-prose-dim/80 whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                </div>
+              );
+            }
+            const char = characters.find((c) => c.id === msg.speakerId);
+            const colors = getCharacterColors(msg.speakerId, char?.name || msg.speakerName);
+            return (
+              <div key={`stream-char-${msg.speakerId}`} className="flex items-end gap-3 animate-fade-in">
+                <div
+                  className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold"
+                  style={{
+                    backgroundColor: colors.avatar,
+                    color: "#fffaf1",
+                    boxShadow: `0 0 18px -5px ${colors.glow}`,
+                  }}
+                >
+                  {getInitials(msg.speakerName)}
+                </div>
+                <div className="min-w-0 max-w-[90%] sm:max-w-[78%]">
+                  <div className="mb-1.5 flex items-end gap-2">
+                    <p className="min-w-0 truncate font-serif text-sm font-semibold" style={{ color: colors.accent }}>
+                      {msg.speakerName}
+                    </p>
+                    {char && <p className="truncate text-[10px] text-prose-muted/56">{char.role}</p>}
+                  </div>
+                  <div
+                    className="chat-bubble chat-bubble-character rounded-[1.3rem] border px-4 py-3.5 sm:px-5"
+                    style={{
+                      backgroundColor: colors.bg,
+                      borderColor: colors.border,
+                      boxShadow: `0 18px 38px -34px ${colors.glow}`,
+                    }}
+                  >
+                    <p className="whitespace-pre-line break-words font-serif text-[15px] leading-relaxed text-prose-dim">
+                      {msg.content}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {sending && !streamingMessages?.length && <LoadingBubble language={language} />}
           <div ref={endRef} />
         </div>
       </div>

@@ -7,4 +7,5 @@ export interface LLMGenerateOptions {
 
 export interface LLMProvider {
   generate(systemPrompt: string, userPrompt: string, options?: LLMGenerateOptions): Promise<string>;
+  stream?(systemPrompt: string, userPrompt: string, options?: LLMGenerateOptions): AsyncIterable<string>;
 }

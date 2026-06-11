@@ -44,7 +44,50 @@ export async function POST(req: NextRequest) {
 
     const lang: "zh" | "en" = language === "zh" ? "zh" : "en";
 
+    // --- Streaming path ---
+    if (body.stream) {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          let closed = false;
+          const send = (event: object) => {
+            if (closed) return;
+            try {
+              controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+            } catch {
+              // Stream already closed (client disconnected)
+            }
+          };
+          try {
+            const _apiStart = Date.now();
+            const result = await runTurn(
+              session.id, world, message.trim(), config, lang, playerName || undefined,
+              send
+            );
+            if (process.env.LLM_DEBUG === "1") console.log(`[PERF:api] /api/chat stream total: ${Date.now() - _apiStart}ms`);
+            send({ type: "done", data: result });
+          } catch (e) {
+            console.error("Chat API stream error:", e);
+            send({ type: "error", data: { message: sanitizeError(e) } });
+          } finally {
+            closed = true;
+            controller.close();
+          }
+        },
+      });
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "application/x-ndjson",
+          "Cache-Control": "no-cache",
+          "Transfer-Encoding": "chunked",
+        },
+      });
+    }
+
+    // --- Non-streaming path (existing) ---
+    const _apiStart = Date.now();
     const result = await runTurn(session.id, world, message.trim(), config, lang, playerName || undefined);
+    if (process.env.LLM_DEBUG === "1") console.log(`[PERF:api] /api/chat total: ${Date.now() - _apiStart}ms`);
 
     return NextResponse.json(result);
   } catch (e) {
