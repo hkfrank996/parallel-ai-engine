@@ -38,6 +38,23 @@ The result is closer to an AI-driven murder mystery engine than a chat UI.
 
 Architecture details live in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+## Streaming
+
+`POST /api/chat` supports optional streaming via `stream: true` in the request body. When enabled, the response is delivered as **Newline-Delimited JSON** (`application/x-ndjson`) with incremental events:
+
+- **narration_done** — narration text arrives first, before character dialogue
+- **character_delta** — real token-level streaming for Anthropic-compatible providers (including MiniMax); full message for others
+- **character_reset** — emitted when stream fails mid-output; client should clear accumulated text
+- **done** — full `TurnResult` after store commit
+
+**What streaming improves:** Time to first text drops from ~18s to ~7s (user sees content sooner).
+
+**What streaming does not improve:** Total wall time is unchanged or slightly higher due to streaming overhead. Streaming is an experience improvement, not a speed optimization.
+
+Token-level streaming currently works with **Anthropic-compatible providers only**. Other providers (OpenAI, Ollama, Mock) fall back to phase-level streaming (narration → full character messages).
+
+API details in [docs/API.md](docs/API.md).
+
 ## Quick start
 
 Requirements:

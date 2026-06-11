@@ -317,6 +317,7 @@ Send a message and receive the world's response.
 | `playerName` | string | No | Player's in-world name |
 | `language` | string | No | `"en"` or `"zh"`. Default `"en"`. |
 | `llmConfig` | object | No | Provider override. If omitted, uses server env or Mock. |
+| `stream` | boolean | No | Set `true` for streaming response (NDJSON). Default `false`. |
 
 **`llmConfig` behavior:**
 - If provided with `apiKey`: uses that key.
@@ -364,3 +365,29 @@ All fields except `userMessage` and `characterMessages` are optional — they ap
 |--------|-------|
 | 400 | Empty or missing `message` |
 | 500 | Engine error |
+
+### Streaming Mode
+
+When `stream: true` is set in the request body, the response uses **Newline-Delimited JSON** (`application/x-ndjson`). Each line is a self-contained JSON object. The `Content-Type` header is `application/x-ndjson`.
+
+**Event types:**
+
+| Event | Shape | When |
+|-------|-------|------|
+| `status` | `{ type: "status", data: { phase: "character_started", characterId, characterName } }` | Before each character generates |
+| `status` | `{ type: "status", data: { phase: "extraction_started" } }` | Before post-turn extraction |
+| `content` | `{ type: "content", data: { kind: "narration_done", text } }` | Narration text ready |
+| `content` | `{ type: "content", data: { kind: "character_delta", characterId, characterName, text } }` | Token-level delta (when provider supports streaming) or full character message |
+| `content` | `{ type: "content", data: { kind: "character_reset", characterId } }` | Stream failed mid-output; frontend should clear accumulated text for this character |
+| `done` | `{ type: "done", data: TurnResult }` | Turn fully committed to store |
+| `error` | `{ type: "error", data: { message } }` | Fatal error |
+
+**Event ordering:** `status(narrator/content)* → [status → content*]* → status(extraction) → done|error`
+
+The `done` event always fires after all store writes succeed. If the store write fails, an `error` event is sent instead.
+
+**Token streaming support:** Real token-level streaming (incremental `character_delta` events) currently works with **Anthropic-compatible providers** (including MiniMax). Other providers (OpenAI, Ollama, Mock) receive the full character message as a single `character_delta` after generation completes.
+
+**Performance note:** Streaming reduces *time to first text* (the user sees narration and dialogue sooner) but does not reduce *total wall time* — the full turn still takes the same time to complete.
+
+**Client implementation:** Use `fetch` with `response.body.getReader()` to consume the NDJSON stream. Parse each line as JSON, accumulate `character_delta` text per character, and handle `character_reset` by clearing accumulated text for that character.
