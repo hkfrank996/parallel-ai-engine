@@ -37,6 +37,11 @@ export function loadDefaultWorld(): World {
   return loadWorld("neon-harbor");
 }
 
+export function listWorldIds(): string[] {
+  if (!fs.existsSync(WORLDS_DIR)) return [];
+  return fs.readdirSync(WORLDS_DIR).filter((f) => f.endsWith(".yaml")).map((f) => f.replace(/\.yaml$/, ""));
+}
+
 export function listWorlds(): { id: string; name: string; genre: string; tagline: string }[] {
   if (!fs.existsSync(WORLDS_DIR)) return [];
   const files = fs.readdirSync(WORLDS_DIR).filter((f) => f.endsWith(".yaml"));
