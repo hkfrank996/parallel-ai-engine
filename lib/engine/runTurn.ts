@@ -21,7 +21,7 @@ import { generateWorldEvents } from "./eventEngine";
 import { computeEmotionalState } from "./emotionalState";
 import { extractClues } from "./clueEngine";
 import { MockProvider } from "@/lib/llm/mockProvider";
-import type { LLMGenerateOptions } from "@/lib/llm/types";
+import { AbortError, isAbortError, type LLMGenerateOptions } from "@/lib/llm/types";
 
 export interface TurnResult {
   userMessage: { id: string; content: string };
@@ -43,6 +43,12 @@ export interface TurnResult {
 function envInt(name: string, fallback: number): number {
   const raw = Number(process.env[name]);
   return Number.isFinite(raw) && raw > 0 ? raw : fallback;
+}
+
+/** Wrap options to inject AbortSignal for the current runTurn call. */
+function withSignal(opts: LLMGenerateOptions | undefined, signal?: AbortSignal): LLMGenerateOptions | undefined {
+  if (!signal) return opts;
+  return { ...(opts || {}), signal };
 }
 
 const GENERATION_OPTIONS = {
@@ -83,7 +89,8 @@ async function generateWithFallback(
   envFallback: ReturnType<typeof getProvider>["envFallback"],
   isMock: boolean,
   language: "zh" | "en",
-  onStreamEvent?: (event: StreamEvent) => void
+  onStreamEvent?: (event: StreamEvent) => void,
+  signal?: AbortSignal
 ): Promise<{ content: string; degraded: boolean }> {
   let raw: string;
   let degraded = false;
@@ -101,6 +108,7 @@ async function generateWithFallback(
         for await (const delta of provider.stream(sys, user, {
           ...GENERATION_OPTIONS.character,
           characterId: char.id,
+          signal,
         })) {
           accumulated += delta;
           onStreamEvent({ kind: "delta", text: delta });
@@ -111,6 +119,9 @@ async function generateWithFallback(
         // Streaming failed after partial output — signal frontend to reset accumulated text
         if (onStreamEvent) onStreamEvent({ kind: "reset" });
         logProviderFailure("character:stream", char.id, streamError);
+        if (isAbortError(streamError) || signal?.aborted) {
+          throw new AbortError("aborted during character stream");
+        }
       }
     }
 
@@ -118,6 +129,7 @@ async function generateWithFallback(
       return await provider.generate(sys, user, {
         ...GENERATION_OPTIONS.character,
         characterId: char.id,
+        signal,
       });
     } catch (error) {
       logProviderFailure("character", char.id, error);
@@ -127,6 +139,7 @@ async function generateWithFallback(
           return await envFallback.generate(sys, user, {
             ...GENERATION_OPTIONS.character,
             characterId: char.id,
+            signal,
           });
         } catch (fallbackError) {
           logProviderFailure("envFallback", char.id, fallbackError);
@@ -181,7 +194,8 @@ async function generateInvestigationNarration(
   userInput: string,
   worldTime: { day: number; timeOfDay: string; turnCount: number },
   relationships: Relationship[],
-  language: "zh" | "en"
+  language: "zh" | "en",
+  signal?: AbortSignal
 ): Promise<string> {
   const actionType = /^\[Look Around\]|^\[环顾四周\]/.test(userInput) ? "look"
     : /^\[Listen\]|^\[竖耳倾听\]/.test(userInput) ? "listen"
@@ -229,12 +243,12 @@ Rules:
 Describe what the player perceives.`;
 
   try {
-    return await provider.generate(system, user, GENERATION_OPTIONS.narration);
+    return await provider.generate(system, user, withSignal(GENERATION_OPTIONS.narration, signal));
   } catch {}
 
   if (envFallback) {
     try {
-      return await envFallback.generate(system, user, GENERATION_OPTIONS.narration);
+      return await envFallback.generate(system, user, withSignal(GENERATION_OPTIONS.narration, signal));
     } catch {}
   }
 
@@ -387,11 +401,17 @@ export async function runTurn(
   llmConfig?: LLMConfig,
   language: "zh" | "en" = "en",
   playerName?: string,
-  onEvent?: (event: { type: string; data: unknown }) => void
+  onEvent?: (event: { type: string; data: unknown }) => void,
+  signal?: AbortSignal
 ): Promise<TurnResult> {
   const { provider, isMock, envFallback } = getProvider(llmConfig);
   const _turnStart = Date.now();
   const recent = getRecentMessages(sessionId, 30);
+
+  const isAborted = () => signal?.aborted === true;
+  if (isAborted()) {
+    throw new AbortError("request aborted before runTurn started");
+  }
   const isFirstTurn = recent.length === 0;
 
   const isInvestigationAction = /^\[Look Around\]|^\[Listen\]|^\[Think\]|^\[环顾四周\]|^\[竖耳倾听\]|^\[整理思路\]/.test(userInput);
@@ -449,7 +469,7 @@ export async function runTurn(
     // Investigation actions: generate narration only, skip character dialogue
     selectedCharacters = [];
     narration = await timed("narration", "investigation", () =>
-      generateInvestigationNarration(provider, envFallback, world, recent, userInput, wt, relationships, language)
+      generateInvestigationNarration(provider, envFallback, world, recent, userInput, wt, relationships, language, signal)
     );
     addMessage({
       id: uuid(),
@@ -463,7 +483,7 @@ export async function runTurn(
   } else if (!isMock) {
     const directorResult = await timed("director", "director", () =>
       runDirector(provider, envFallback, world, world.characters, recent, userInput,
-        relationships, wt, existingWorldEvents, language, playerName, GENERATION_OPTIONS.director)
+        relationships, wt, existingWorldEvents, language, playerName, withSignal(GENERATION_OPTIONS.director, signal))
     );
     selectedCharacters = world.characters.filter((c) =>
       directorResult.speakerIds.includes(c.id)
@@ -503,13 +523,13 @@ export async function runTurn(
           timed("extraction:relationship", "relationships", () =>
             analyzeRelationships(
               provider, envFallback, world, world.characters, recent, userInput,
-              relationships, sessionId, wt.turnCount, language, GENERATION_OPTIONS.extraction
+              relationships, sessionId, wt.turnCount, language, withSignal(GENERATION_OPTIONS.extraction, signal)
             )
           ),
           timed("extraction:event", "world-events", () =>
             generateWorldEvents(
               provider, envFallback, world, world.characters, recent, userInput,
-              relationships, wt, sessionId, wt.turnCount, language, GENERATION_OPTIONS.extraction
+              relationships, wt, sessionId, wt.turnCount, language, withSignal(GENERATION_OPTIONS.extraction, signal)
             )
           ),
         ]))
@@ -519,6 +539,9 @@ export async function runTurn(
   const characterMessages: { speakerId: string; speakerName: string; content: string }[] = [];
 
   for (const char of selectedCharacters) {
+    if (isAborted()) {
+      throw new AbortError("aborted before character generation");
+    }
     const { facts, personalMemories } = retrieveMemories(allFacts, allMems, char.id);
     const memoryBlock = formatMemoriesForPrompt(facts, personalMemories);
     const emotionalState = computeEmotionalState(char, relationships, personalMemories, wt.timeOfDay, language);
@@ -536,9 +559,13 @@ export async function runTurn(
           } else {
             onEvent({ type: "content", data: { kind: "character_delta", characterId: char.id, characterName: char.name, text: event.text } });
           }
-        } : undefined
+        } : undefined,
+        signal
       )
     );
+    if (isAborted()) {
+      throw new AbortError("aborted during character generation");
+    }
     if (charDegraded) degraded = true;
 
     const msgId = uuid();
@@ -578,6 +605,9 @@ export async function runTurn(
   let memoriesExtracted: TurnResult["memoriesExtracted"];
 
   if (!isMock) {
+    if (isAborted()) {
+      throw new AbortError("aborted before late extraction");
+    }
     const turnMessages = [
       { id: "", sessionId, speakerType: "user" as const, speakerId: null, speakerName: playerName || "You", content: userInput, createdAt: "" },
       ...characterMessages.map((m) => ({
@@ -592,12 +622,12 @@ export async function runTurn(
     const [lateExtracted, rawClues] = await timed("extraction", "late-mem+clues", () => Promise.all([
       timed("extraction:memory", "memories", () =>
         extractMemories(
-          provider, envFallback, world, world.characters, turnMessages, sessionId, turnIndex, language, GENERATION_OPTIONS.extraction
+          provider, envFallback, world, world.characters, turnMessages, sessionId, turnIndex, language, withSignal(GENERATION_OPTIONS.extraction, signal)
         )
       ),
       timed("extraction:clue", "clues", () =>
         extractClues(
-          provider, envFallback, world, world.characters, turnMessages, sessionId, wt.turnCount, language, GENERATION_OPTIONS.extraction
+          provider, envFallback, world, world.characters, turnMessages, sessionId, wt.turnCount, language, withSignal(GENERATION_OPTIONS.extraction, signal)
         )
       ),
     ]));

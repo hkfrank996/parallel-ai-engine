@@ -4,6 +4,7 @@ import { getOrCreateSession, getSession } from "@/lib/storage/store";
 import { runTurn } from "@/lib/engine/runTurn";
 import type { ProviderKey } from "@/lib/llm/catalog";
 import { assertSafeApiUrl, sanitizeError } from "@/lib/llm/validateUrl";
+import { isAbortError } from "@/lib/llm/types";
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,13 +63,18 @@ export async function POST(req: NextRequest) {
             const _apiStart = Date.now();
             const result = await runTurn(
               session.id, world, message.trim(), config, lang, playerName || undefined,
-              send
+              send, req.signal
             );
             if (process.env.LLM_DEBUG === "1") console.log(`[PERF:api] /api/chat stream total: ${Date.now() - _apiStart}ms`);
             send({ type: "done", data: result });
           } catch (e) {
-            console.error("Chat API stream error:", e);
-            send({ type: "error", data: { message: sanitizeError(e) } });
+            // For aborts, don't treat as a real error — just close cleanly
+            if (isAbortError(e) || (e as Error)?.name === "AbortError") {
+              // Stream already closed by client; skip
+            } else {
+              console.error("Chat API stream error:", e);
+              send({ type: "error", data: { message: sanitizeError(e) } });
+            }
           } finally {
             closed = true;
             controller.close();
@@ -86,11 +92,14 @@ export async function POST(req: NextRequest) {
 
     // --- Non-streaming path (existing) ---
     const _apiStart = Date.now();
-    const result = await runTurn(session.id, world, message.trim(), config, lang, playerName || undefined);
+    const result = await runTurn(session.id, world, message.trim(), config, lang, playerName || undefined, undefined, req.signal);
     if (process.env.LLM_DEBUG === "1") console.log(`[PERF:api] /api/chat total: ${Date.now() - _apiStart}ms`);
 
     return NextResponse.json(result);
   } catch (e) {
+    if (isAbortError(e) || (e as Error)?.name === "AbortError") {
+      return new Response(null, { status: 499 });
+    }
     console.error("Chat API error:", e);
     return NextResponse.json(
       { error: sanitizeError(e) },

@@ -1,4 +1,4 @@
-import { LLMGenerateOptions, LLMProvider } from "./types";
+import { AbortError, LLMGenerateOptions, LLMProvider, isAbortError } from "./types";
 
 export class AnthropicProvider implements LLMProvider {
   private apiKey: string;
@@ -39,6 +39,16 @@ export class AnthropicProvider implements LLMProvider {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
+    // Bridge external signal to internal controller
+    const onAbort = () => controller.abort();
+    if (options?.signal) {
+      if (options.signal.aborted) {
+        controller.abort();
+      } else {
+        options.signal.addEventListener("abort", onAbort, { once: true });
+      }
+    }
+
     let res: Response;
     try {
       res = await fetch(url, {
@@ -54,12 +64,18 @@ export class AnthropicProvider implements LLMProvider {
         signal: controller.signal,
       });
     } catch (e) {
+      if (isAbortError(e)) {
+        throw new AbortError();
+      }
       if ((e as Error).name === "AbortError") {
-        throw new Error(`Anthropic API timeout after ${timeoutMs}ms`);
+        throw new AbortError();
       }
       throw e;
     } finally {
       clearTimeout(timeout);
+      if (options?.signal) {
+        options.signal.removeEventListener("abort", onAbort);
+      }
     }
 
     const body = await res.json();
@@ -103,6 +119,16 @@ export class AnthropicProvider implements LLMProvider {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
+    // Bridge external signal to internal controller
+    const onAbort = () => controller.abort();
+    if (options?.signal) {
+      if (options.signal.aborted) {
+        controller.abort();
+      } else {
+        options.signal.addEventListener("abort", onAbort, { once: true });
+      }
+    }
+
     let res: Response;
     try {
       res = await fetch(url, {
@@ -120,14 +146,20 @@ export class AnthropicProvider implements LLMProvider {
       });
     } catch (e) {
       clearTimeout(timeout);
-      if ((e as Error).name === "AbortError") {
-        throw new Error(`Anthropic API timeout after ${timeoutMs}ms`);
+      if (options?.signal) {
+        options.signal.removeEventListener("abort", onAbort);
+      }
+      if (isAbortError(e) || (e as Error).name === "AbortError") {
+        throw new AbortError();
       }
       throw e;
     }
 
     if (!res.ok) {
       clearTimeout(timeout);
+      if (options?.signal) {
+        options.signal.removeEventListener("abort", onAbort);
+      }
       const body = await res.json().catch(() => null);
       const msg = (body as Record<string, unknown>)?.error
         ? ((body as Record<string, unknown>).error as Record<string, string>)?.message
@@ -172,6 +204,9 @@ export class AnthropicProvider implements LLMProvider {
       }
     } finally {
       clearTimeout(timeout);
+      if (options?.signal) {
+        options.signal.removeEventListener("abort", onAbort);
+      }
       reader.releaseLock();
     }
   }

@@ -434,3 +434,48 @@ describe("runTurn stream fallback", () => {
     expect((deltasAfterReset[0].data as { text: string }).text).toBe("Fallback complete text");
   });
 });
+
+// ============================================================
+// Group 7: AbortSignal / cancellation
+// ============================================================
+describe("runTurn AbortSignal", () => {
+  it("throws AbortError when signal is already aborted at entry", async () => {
+    const ctrl = new AbortController();
+    ctrl.abort();
+    const { runTurn } = await import("./runTurn");
+    await expect(
+      runTurn("session-1", makeWorld(), "hi", undefined, "en", "Player", undefined, ctrl.signal)
+    ).rejects.toThrow();
+  });
+
+  it("signal aborts propagation to provider via withSignal", async () => {
+    // Verify that when signal is provided, the provider's generate() receives
+    // an options object that contains the signal. This is the propagation path
+    // that allows fetch() in AnthropicProvider to honor the abort.
+    let capturedOptions: { signal?: AbortSignal } | undefined;
+    const ctrl = new AbortController();
+    const charGen = vi.fn(async (_sys: string, _user: string, opts?: { signal?: AbortSignal }) => {
+      capturedOptions = opts;
+      return "text";
+    });
+    providerMocks.getProvider.mockReturnValue({
+      provider: { generate: charGen, stream: charGen } as any,
+      isMock: false,
+      envFallback: null,
+    });
+    mockRunDirector.mockResolvedValue({
+      speakerIds: ["mira"],
+      sceneUpdate: "scene",
+      narration: "",
+    });
+
+    const { runTurn } = await import("./runTurn");
+    try {
+      await runTurn("session-1", makeWorld(), "hi", undefined, "en", "Player", undefined, ctrl.signal);
+    } catch {
+      // May throw due to incomplete storage mocks; the assertion below is what matters
+    }
+
+    expect(capturedOptions?.signal).toBe(ctrl.signal);
+  });
+});

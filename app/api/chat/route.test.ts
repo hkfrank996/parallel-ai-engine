@@ -140,4 +140,37 @@ describe("/api/chat streaming contract", () => {
     expect(fallbackDelta).toBeTruthy();
     expect(fallbackDelta.data.text).toBe("Complete fallback text.");
   });
+
+  it("passes request.signal into runTurn on the streaming branch", async () => {
+    let capturedSignal: AbortSignal | undefined;
+    mockRunTurn.mockImplementation(async (..._args: unknown[]) => {
+      // The streaming route's signature: (sid, world, msg, cfg, lang, name, onEvent, signal)
+      // signal is the 8th positional argument
+      capturedSignal = _args[7] as AbortSignal | undefined;
+      return { userMessage: { id: "1", content: "hi" }, characterMessages: [] };
+    });
+    const ctrl = new AbortController();
+    const { POST } = await import("./route");
+    // Pass an AbortSignal through a fake Request
+    await POST({
+      json: async () => ({ message: "hi", stream: true }),
+      signal: ctrl.signal,
+    } as never);
+
+    expect(capturedSignal).toBe(ctrl.signal);
+  });
+
+  it("aborted request does not produce a content error event", async () => {
+    const err = Object.assign(new Error("aborted"), { name: "AbortError" });
+    mockRunTurn.mockRejectedValue(err);
+    const { POST } = await import("./route");
+    const ctrl = new AbortController();
+    const res = await POST({
+      json: async () => ({ message: "hi", stream: true }),
+      signal: ctrl.signal,
+    } as never);
+    const text = await res.text();
+    // Aborted stream should produce minimal/empty output, not an error event
+    expect(text).not.toContain('"type":"error"');
+  });
 });
