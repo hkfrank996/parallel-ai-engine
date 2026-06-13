@@ -1,4 +1,4 @@
-import { LLMGenerateOptions, LLMProvider } from "./types";
+import { AbortError, isAbortError, LLMGenerateOptions, LLMProvider } from "./types";
 
 export class OpenAIProvider implements LLMProvider {
   private apiKey: string;
@@ -25,6 +25,15 @@ export class OpenAIProvider implements LLMProvider {
       lastEndpoint = endpoint;
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      const onAbort = () => controller.abort();
+      if (options?.signal) {
+        if (options.signal.aborted) {
+          controller.abort();
+        } else {
+          options.signal.addEventListener("abort", onAbort, { once: true });
+        }
+      }
+
       let res: Response;
 
       try {
@@ -50,15 +59,17 @@ export class OpenAIProvider implements LLMProvider {
           signal: controller.signal,
         });
       } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") {
-          throw new Error(`OpenAI API timeout after ${timeoutMs}ms`);
+        clearTimeout(timeout);
+        if (options?.signal) options.signal.removeEventListener("abort", onAbort);
+        if (isAbortError(error) || (error as Error).name === "AbortError") {
+          throw new AbortError();
         }
         throw error;
-      } finally {
-        clearTimeout(timeout);
       }
 
       if (!res.ok) {
+        clearTimeout(timeout);
+        if (options?.signal) options.signal.removeEventListener("abort", onAbort);
         const text = await res.text();
         console.error("OpenAI API error body:", text.slice(0, 1000));
         lastError = `OpenAI API error ${res.status}`;
@@ -67,6 +78,9 @@ export class OpenAIProvider implements LLMProvider {
       }
 
       const text = await res.text();
+      clearTimeout(timeout);
+      if (options?.signal) options.signal.removeEventListener("abort", onAbort);
+
       if (looksLikeHtml(text, res.headers.get("content-type"))) {
         lastError = `OpenAI API endpoint returned HTML (status ${res.status})`;
         continue;
@@ -88,6 +102,154 @@ export class OpenAIProvider implements LLMProvider {
     }
 
     throw new Error(lastError || "OpenAI API request failed");
+  }
+
+  async *stream(systemPrompt: string, userPrompt: string, options?: LLMGenerateOptions): AsyncIterable<string> {
+    const endpoints = buildChatCompletionsUrls(this.baseUrl);
+    const timeoutMs = options?.timeoutMs ?? this.timeoutMs;
+    const temperature = options?.temperature ?? 0.8;
+    const maxTokens = options?.maxTokens ?? 4096;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    };
+    if (this.apiKey) {
+      headers.Authorization = `Bearer ${this.apiKey}`;
+    }
+
+    // Try endpoints in order; first one that yields at least one token wins
+    let lastError = "";
+    for (const endpoint of endpoints) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      const onAbort = () => controller.abort();
+      if (options?.signal) {
+        if (options.signal.aborted) {
+          controller.abort();
+        } else {
+          options.signal.addEventListener("abort", onAbort, { once: true });
+        }
+      }
+
+      let res: Response;
+      try {
+        res = await fetch(endpoint, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            model: this.model,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt },
+            ],
+            temperature,
+            max_tokens: maxTokens,
+            stream: true,
+          }),
+          signal: controller.signal,
+        });
+      } catch (error) {
+        clearTimeout(timeout);
+        if (options?.signal) options.signal.removeEventListener("abort", onAbort);
+        if (isAbortError(error) || (error as Error).name === "AbortError") {
+          throw new AbortError();
+        }
+        lastError = error instanceof Error ? error.message : String(error);
+        continue;
+      }
+
+      if (!res.ok) {
+        clearTimeout(timeout);
+        if (options?.signal) options.signal.removeEventListener("abort", onAbort);
+        const text = await res.text().catch(() => "");
+        console.error("OpenAI stream error body:", text.slice(0, 1000));
+        if (shouldTryNextEndpoint(res.status)) {
+          lastError = `OpenAI API error ${res.status}`;
+          continue;
+        }
+        throw new Error(`OpenAI API stream error ${res.status}: ${text.slice(0, 200)}`);
+      }
+
+      // Stream response is now committed. Use shared SSE parser.
+      const reader = res.body!.getReader();
+      let yieldedAny = false;
+
+      try {
+        for await (const token of parseOpenAIStreamTokens(reader)) {
+          yieldedAny = true;
+          yield token;
+        }
+        if (yieldedAny) {
+          return;
+        }
+        lastError = "OpenAI stream produced no tokens";
+      } catch (error) {
+        clearTimeout(timeout);
+        if (options?.signal) options.signal.removeEventListener("abort", onAbort);
+        if (isAbortError(error) || (error as Error).name === "AbortError") {
+          throw new AbortError();
+        }
+        throw error;
+      } finally {
+        clearTimeout(timeout);
+        if (options?.signal) options.signal.removeEventListener("abort", onAbort);
+      }
+    }
+
+    throw new Error(lastError || "OpenAI stream failed across all endpoints");
+  }
+}
+
+/** Yields token strings from a stream of raw SSE byte chunks. */
+async function* parseOpenAIStreamTokens(
+  reader: ReadableStreamDefaultReader<Uint8Array>
+): AsyncIterable<string> {
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let doneReceived = false;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop()!;
+    for (const line of lines) {
+      if (doneReceived) break;
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith("data:")) continue;
+      const data = trimmed.slice(5).trim();
+      if (data === "[DONE]") {
+        doneReceived = true;
+        continue;
+      }
+      if (!data) continue;
+      try {
+        const parsed = JSON.parse(data);
+        const delta = (parsed as { choices?: { delta?: { content?: string } }[] }).choices?.[0]?.delta?.content;
+        if (typeof delta === "string" && delta) yield delta;
+      } catch {
+        // Skip malformed lines (likely keep-alive pings)
+      }
+    }
+    if (doneReceived) break;
+  }
+  // Flush any remaining bytes from the decoder (rare edge case)
+  buffer += decoder.decode();
+  if (buffer.trim()) {
+    const last = buffer.trim();
+    if (last.startsWith("data:")) {
+      const data = last.slice(5).trim();
+      if (data && data !== "[DONE]") {
+        try {
+          const parsed = JSON.parse(data);
+          const delta = (parsed as { choices?: { delta?: { content?: string } }[] }).choices?.[0]?.delta?.content;
+          if (typeof delta === "string" && delta) yield delta;
+        } catch {
+          // ignore trailing malformed line
+        }
+      }
+    }
   }
 }
 
